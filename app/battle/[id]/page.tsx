@@ -49,7 +49,7 @@ export default async function BattlePage({
     }));
 
     return (
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto max-w-2xl px-4 py-8">
         <BackButton />
         <ReplayBattleFeed
           battleId={battle.id}
@@ -66,7 +66,7 @@ export default async function BattlePage({
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container mx-auto max-w-2xl px-4 py-8">
       <BackButton />
       <LiveBattleFeed
         battleId={battle.id}
