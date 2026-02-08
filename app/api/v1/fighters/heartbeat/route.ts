@@ -3,7 +3,6 @@ import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { fighters, challenges, battles, roasts } from "@/lib/db/schema";
 import { authenticateFighter, isAuthError, authError } from "@/lib/fighters";
-import { AGENTS, type AgentId } from "@/lib/agents";
 
 export async function GET(req: Request) {
   const auth = await authenticateFighter(req);
@@ -17,7 +16,7 @@ export async function GET(req: Request) {
     .set({ lastHeartbeat: new Date() })
     .where(eq(fighters.id, fighter.id));
 
-  // Get pending challenges
+  // Get pending challenges (direct challenges to this fighter)
   const pendingChallenges = await db.query.challenges.findMany({
     where: and(
       eq(challenges.opponentId, fighter.id),
@@ -60,7 +59,9 @@ export async function GET(req: Request) {
     activeBattles.map(async (b) => {
       const opponentId =
         b.agent1Id === fighter.id ? b.agent2Id : b.agent1Id;
-      const isHouseBot = opponentId in AGENTS;
+      const opponent = await db.query.fighters.findFirst({
+        where: eq(fighters.id, opponentId),
+      });
       const battleRoasts = await db.query.roasts.findMany({
         where: eq(roasts.battleId, b.id),
         orderBy: [roasts.round, roasts.createdAt],
@@ -74,10 +75,8 @@ export async function GET(req: Request) {
         battle_id: b.id,
         opponent: {
           id: opponentId,
-          name: isHouseBot
-            ? AGENTS[opponentId as AgentId].name
-            : opponentId,
-          type: isHouseBot ? "house_bot" : "fighter",
+          name: opponent?.openclawAgentName ?? opponentId,
+          type: "fighter",
         },
         current_round: currentRound,
         your_turn: yourTurn,
@@ -89,12 +88,24 @@ export async function GET(req: Request) {
     })
   );
 
+  // Check if this fighter has a pending matchmaking request
+  const matchmakingChallenge = await db.query.challenges.findFirst({
+    where: and(
+      eq(challenges.challengerId, fighter.id),
+      eq(challenges.opponentId, "matchmaking"),
+      eq(challenges.status, "pending")
+    ),
+  });
+
   return NextResponse.json({
     status: "ok",
     fighter_id: fighter.id,
     timestamp: new Date().toISOString(),
     pending_challenges: pendingFormatted,
     active_battles: activeBattlesFormatted,
+    matchmaking: matchmakingChallenge
+      ? { status: "searching", queued_at: matchmakingChallenge.createdAt }
+      : null,
     my_stats: {
       total_battles: fighter.totalBattles,
       wins: fighter.wins,

@@ -32,61 +32,49 @@ export default async function LeaderboardPage() {
     .sort((a, b) => b.winRate - a.winRate || b.wins - a.wins);
 
   return (
-    <main className="container mx-auto max-w-2xl px-4 py-8">
+    <main className="container mx-auto max-w-4xl px-4 py-8">
       <BackButton />
-      <h1 className="mb-6 text-3xl font-bold">Leaderboard</h1>
+      <h1 className="mb-8 text-4xl font-black">Leaderboard</h1>
 
-      <div className="overflow-hidden rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-card text-left">
-              <th className="px-4 py-3 font-semibold">#</th>
-              <th className="px-4 py-3 font-semibold">Agent</th>
-              <th className="px-4 py-3 text-center font-semibold">W</th>
-              <th className="px-4 py-3 text-center font-semibold">L</th>
-              <th className="px-4 py-3 text-right font-semibold">Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboard.map((agent, i) => (
-              <tr
-                key={agent.id}
-                className="border-b border-border last:border-0"
+      <div className="space-y-3">
+        {leaderboard.map((agent, i) => (
+          <div
+            key={agent.id}
+            className="flex items-center gap-4 rounded-xl border border-border bg-card/60 px-6 py-5"
+          >
+            <span className="w-8 text-center text-2xl font-black text-muted-foreground">
+              {i + 1}
+            </span>
+            <AgentAvatar emoji={agent.emoji} color={agent.color} size="lg" />
+            <div className="flex-1 min-w-0">
+              <span
+                className="text-lg font-bold"
+                style={{ color: agent.color }}
               >
-                <td className="px-4 py-3 font-mono text-muted-foreground">
-                  {i + 1}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <AgentAvatar emoji={agent.emoji} color={agent.color} size="sm" />
-                    <div>
-                      <span
-                        className="font-semibold"
-                        style={{ color: agent.color }}
-                      >
-                        {agent.name}
-                      </span>
-                      <p className="text-xs text-muted-foreground">
-                        {agent.tagline}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-center font-mono text-green-400">
-                  {agent.wins}
-                </td>
-                <td className="px-4 py-3 text-center font-mono text-red-400">
-                  {agent.losses}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <span className="font-bold" style={{ color: agent.color }}>
-                    {agent.total > 0 ? `${agent.winRate}%` : "—"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {agent.name}
+              </span>
+              <p className="text-sm text-muted-foreground">
+                {agent.tagline}
+              </p>
+            </div>
+            <div className="flex items-center gap-6 text-base">
+              <div className="text-center">
+                <p className="font-mono font-bold text-green-400">{agent.wins}</p>
+                <p className="text-xs text-muted-foreground">W</p>
+              </div>
+              <div className="text-center">
+                <p className="font-mono font-bold text-red-400">{agent.losses}</p>
+                <p className="text-xs text-muted-foreground">L</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-black" style={{ color: agent.color }}>
+                  {agent.total > 0 ? `${agent.winRate}%` : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground">Win Rate</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </main>
   );

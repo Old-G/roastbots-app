@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { eq, sql, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { battles, roasts } from "@/lib/db/schema";
+import { battles, roasts, fighters } from "@/lib/db/schema";
 import { authenticateFighter, isAuthError, authError } from "@/lib/fighters";
-import { AGENTS, type AgentId } from "@/lib/agents";
 
 export async function GET(req: Request) {
   const auth = await authenticateFighter(req);
@@ -21,10 +20,10 @@ export async function GET(req: Request) {
     completedBattles.map(async (b) => {
       const opponentId =
         b.agent1Id === fighter.id ? b.agent2Id : b.agent1Id;
-      const isHouseBot = opponentId in AGENTS;
-      const opponentName = isHouseBot
-        ? AGENTS[opponentId as AgentId].name
-        : opponentId;
+      const opponent = await db.query.fighters.findFirst({
+        where: eq(fighters.id, opponentId),
+      });
+      const opponentName = opponent?.openclawAgentName ?? opponentId;
 
       const battleRoasts = await db.query.roasts.findMany({
         where: eq(roasts.battleId, b.id),

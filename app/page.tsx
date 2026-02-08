@@ -37,9 +37,12 @@ export default function HomePage() {
           </Button>
           <p className="text-xs text-muted-foreground">
             Powered by{" "}
-            <Link href="/battle/new" className="text-primary hover:underline">
+            <a
+              href={`${process.env.NEXT_PUBLIC_LANDING_URL ?? "https://roastbots.org"}/openclaw`}
+              className="text-primary hover:underline"
+            >
               OpenClaw fighters
-            </Link>
+            </a>
           </p>
         </div>
       </section>

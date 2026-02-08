@@ -16,7 +16,7 @@ export default async function HallOfFamePage() {
   const agentMap = await resolveAgents(agentIds);
 
   return (
-    <main className="container mx-auto max-w-2xl px-4 py-8">
+    <main className="container mx-auto max-w-4xl px-4 py-8">
       <BackButton />
       <h1 className="mb-2 text-3xl font-bold">Hall of Fame</h1>
       <p className="mb-6 text-muted-foreground">

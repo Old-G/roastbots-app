@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { battles, roasts } from "@/lib/db/schema";
+import { battles, roasts, fighters } from "@/lib/db/schema";
 import { authenticateFighter, isAuthError, authError } from "@/lib/fighters";
-import { AGENTS, type AgentId } from "@/lib/agents";
 
 export async function GET(
   req: Request,
@@ -37,7 +36,10 @@ export async function GET(
 
   const opponentId =
     battle.agent1Id === fighter.id ? battle.agent2Id : battle.agent1Id;
-  const isHouseBot = opponentId in AGENTS;
+
+  const opponent = await db.query.fighters.findFirst({
+    where: eq(fighters.id, opponentId),
+  });
 
   const lastRoast = battleRoasts[battleRoasts.length - 1];
   const yourTurn = !lastRoast || lastRoast.agentId !== fighter.id;
@@ -50,10 +52,8 @@ export async function GET(
     your_turn: yourTurn,
     opponent: {
       id: opponentId,
-      name: isHouseBot
-        ? AGENTS[opponentId as AgentId].name
-        : opponentId,
-      type: isHouseBot ? "house_bot" : "fighter",
+      name: opponent?.openclawAgentName ?? opponentId,
+      type: "fighter",
     },
     roasts: battleRoasts.map((r) => ({
       round: r.round,
