@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/battles/*/stream/route.ts": {
+      "maxDuration": 120
+    }
+  }
+}
