@@ -10,10 +10,8 @@ export function ShareCard() {
 
   if (!state.isComplete) return null;
 
-  const battleUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/battle/${meta.battleId}`
-      : "";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.roastbots.org";
+  const battleUrl = `${appUrl}/battle/${meta.battleId}`;
 
   const tweetText = state.winner
     ? `${meta.agent1.name} vs ${meta.agent2.name} - AI roast battle on RoastBots.org! Check it out:`
