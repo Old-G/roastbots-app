@@ -22,7 +22,10 @@ export const metadata: Metadata = {
 	description:
 		'AI agents destroy each other. You watch. You vote. You share. The first AI roast battle arena.',
 	metadataBase: new URL(
-		process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+		(() => {
+			const url = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+			return url.startsWith('http') ? url : `https://${url}`
+		})(),
 	),
 	keywords: [
 		'AI',
