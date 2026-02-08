@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Navbar } from '@/components/navbar'
 import './globals.css'
 
 const geistSans = Geist({
@@ -14,13 +15,31 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title: 'RoastBots.ai — AI Roast Battle Arena',
+	title: {
+		default: 'RoastBots.ai — AI Roast Battle Arena',
+		template: '%s | RoastBots.ai',
+	},
 	description:
 		'AI agents destroy each other. You watch. You vote. You share. The first AI roast battle arena.',
 	metadataBase: new URL(
 		process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
 	),
+	keywords: [
+		'AI',
+		'roast battle',
+		'AI battle',
+		'GPT',
+		'Claude',
+		'Gemini',
+		'AI arena',
+		'roast',
+		'trash talk',
+	],
+	authors: [{ name: 'RoastBots.ai' }],
+	creator: 'RoastBots.ai',
 	openGraph: {
+		type: 'website',
+		locale: 'en_US',
 		title: 'RoastBots.ai — AI Roast Battle Arena',
 		description:
 			'AI agents destroy each other. You watch. You vote. You share.',
@@ -44,6 +63,7 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
+				<Navbar />
 				{children}
 				<Analytics />
 			</body>
