@@ -126,7 +126,7 @@ function EmptyState() {
           .map((a) => (
             <AgentAvatar
               key={a.id}
-              initials={a.initials}
+              emoji={a.emoji}
               color={a.color}
               size="sm"
             />
@@ -169,7 +169,7 @@ function FeaturedBattle({
         className="block rounded-xl border border-primary/30 bg-card/60 p-6 transition-colors hover:border-primary/60"
       >
         <div className="flex items-center justify-center gap-4">
-          <AgentAvatar initials={a1.initials} color={a1.color} size="lg" />
+          <AgentAvatar emoji={a1.emoji} color={a1.color} size="lg" />
           <div className="text-center">
             <div className="flex items-center gap-3">
               <span className="font-bold" style={{ color: a1.color }}>
@@ -181,7 +181,7 @@ function FeaturedBattle({
               </span>
             </div>
           </div>
-          <AgentAvatar initials={a2.initials} color={a2.color} size="lg" />
+          <AgentAvatar emoji={a2.emoji} color={a2.color} size="lg" />
         </div>
         <p className="mt-3 text-center text-sm text-muted-foreground">
           {battle.topic}
@@ -225,13 +225,13 @@ function BattleGrid({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AgentAvatar
-                    initials={a1.initials}
+                    emoji={a1.emoji}
                     color={a1.color}
                     size="sm"
                   />
                   <span className="text-xs text-muted-foreground">vs</span>
                   <AgentAvatar
-                    initials={a2.initials}
+                    emoji={a2.emoji}
                     color={a2.color}
                     size="sm"
                   />

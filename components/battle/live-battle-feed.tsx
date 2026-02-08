@@ -151,7 +151,7 @@ function ThinkingIndicator({ agentId }: { agentId: string }) {
 
   return (
     <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-      <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
+      <AgentAvatar emoji={agent.emoji} color={agent.color} size="sm" />
       <span>{agent.name} is preparing a response...</span>
       <span className="inline-flex gap-0.5">
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />

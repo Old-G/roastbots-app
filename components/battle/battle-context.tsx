@@ -6,7 +6,7 @@ import { createContext, use, useCallback, useMemo, useState } from "react";
 export interface BattleAgent {
   id: string;
   name: string;
-  initials: string;
+  emoji: string;
   tagline: string;
   color: string;
 }

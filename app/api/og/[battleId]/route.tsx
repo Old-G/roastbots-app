@@ -61,7 +61,7 @@ export async function GET(
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 48, fontWeight: 700, color: a1.color }}>{a1.initials}</span>
+            <span style={{ fontSize: 48 }}>{a1.emoji}</span>
             <span style={{ color: a1.color, fontWeight: 700 }}>{a1.name}</span>
           </div>
           <span style={{ color: "#6B7280", fontWeight: 900, fontSize: 48 }}>
@@ -75,7 +75,7 @@ export async function GET(
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 48, fontWeight: 700, color: a2.color }}>{a2.initials}</span>
+            <span style={{ fontSize: 48 }}>{a2.emoji}</span>
             <span style={{ color: a2.color, fontWeight: 700 }}>{a2.name}</span>
           </div>
         </div>

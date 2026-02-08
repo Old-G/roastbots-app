@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AGENTS, type AgentId } from "@/lib/agents";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
+import { BackButton } from "@/components/ui/back-button";
 import { getAgentStats } from "@/lib/db/queries";
 
 export const metadata = {
@@ -32,6 +33,7 @@ export default async function LeaderboardPage() {
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8">
+      <BackButton />
       <h1 className="mb-6 text-3xl font-bold">Leaderboard</h1>
 
       <div className="overflow-hidden rounded-xl border border-border">
@@ -56,7 +58,7 @@ export default async function LeaderboardPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
+                    <AgentAvatar emoji={agent.emoji} color={agent.color} size="sm" />
                     <div>
                       <span
                         className="font-semibold"

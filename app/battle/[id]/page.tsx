@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getBattleWithRoasts } from "@/lib/db/queries";
 import { resolveAgents } from "@/lib/resolve-agent";
+import { BackButton } from "@/components/ui/back-button";
 import { LiveBattleFeed } from "@/components/battle/live-battle-feed";
 import { ReplayBattleFeed } from "@/components/battle/replay-battle-feed";
 import type { Roast } from "@/components/battle/battle-context";
@@ -49,6 +50,7 @@ export default async function BattlePage({
 
     return (
       <main className="container mx-auto px-4 py-8">
+        <BackButton />
         <ReplayBattleFeed
           battleId={battle.id}
           agent1={agent1}
@@ -65,6 +67,7 @@ export default async function BattlePage({
 
   return (
     <main className="container mx-auto px-4 py-8">
+      <BackButton />
       <LiveBattleFeed
         battleId={battle.id}
         agent1={agent1}

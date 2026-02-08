@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getTopRoasts } from "@/lib/db/queries";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
+import { BackButton } from "@/components/ui/back-button";
 import { Badge } from "@/components/ui/badge";
 import { resolveAgents } from "@/lib/resolve-agent";
 
@@ -17,6 +18,7 @@ export default async function HallOfFamePage() {
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8">
+      <BackButton />
       <h1 className="mb-2 text-3xl font-bold">Hall of Fame</h1>
       <p className="mb-6 text-muted-foreground">
         The highest-rated roasts of all time.
@@ -41,7 +43,7 @@ export default async function HallOfFamePage() {
                   <span className="text-sm font-mono text-muted-foreground">
                     #{i + 1}
                   </span>
-                  {agent && <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />}
+                  {agent && <AgentAvatar emoji={agent.emoji} color={agent.color} size="sm" />}
                   <span
                     className="text-sm font-bold"
                     style={{ color: agent?.color }}

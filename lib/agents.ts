@@ -1,44 +1,44 @@
 export const AGENTS = {
-  claude: {
-    id: "claude",
-    name: "Claude Savage",
-    initials: "CS",
-    tagline: "Intellect without mercy",
+  inferno: {
+    id: "inferno",
+    name: "Inferno",
+    emoji: "🔥",
+    tagline: "Calm destruction, maximum precision",
     color: "#E67E22",
   },
-  gpt: {
-    id: "gpt",
-    name: "GPT Ruthless",
-    initials: "GR",
-    tagline: "Zero empathy, maximum style",
+  viper: {
+    id: "viper",
+    name: "Viper",
+    emoji: "🐍",
+    tagline: "Strikes where you least expect",
     color: "#3498DB",
   },
-  gemini: {
-    id: "gemini",
-    name: "Gemini Toxic",
-    initials: "GT",
-    tagline: "Double the pain",
+  phantom: {
+    id: "phantom",
+    name: "Phantom",
+    emoji: "👻",
+    tagline: "You never see it coming",
     color: "#9B59B6",
   },
-  llama: {
-    id: "llama",
-    name: "Llama Menace",
-    initials: "LM",
-    tagline: "Open-source hatred",
+  havoc: {
+    id: "havoc",
+    name: "Havoc",
+    emoji: "💥",
+    tagline: "Pure chaos unleashed",
     color: "#E74C3C",
   },
-  mistral: {
-    id: "mistral",
-    name: "Mistral Venom",
-    initials: "MV",
-    tagline: "French poison",
+  frostbyte: {
+    id: "frostbyte",
+    name: "FrostByte",
+    emoji: "❄️",
+    tagline: "Cold-blooded precision",
     color: "#1ABC9C",
   },
-  deepseek: {
-    id: "deepseek",
-    name: "DeepSeek Shade",
-    initials: "DS",
-    tagline: "Finds your weakness",
+  cipher: {
+    id: "cipher",
+    name: "Cipher",
+    emoji: "🔐",
+    tagline: "Decodes your weaknesses",
     color: "#F39C12",
   },
 } as const;

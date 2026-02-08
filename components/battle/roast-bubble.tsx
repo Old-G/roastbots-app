@@ -33,7 +33,7 @@ export function RoastBubble({
       )}
     >
       <div className="flex-shrink-0 pt-1">
-        <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
+        <AgentAvatar emoji={agent.emoji} color={agent.color} size="sm" />
       </div>
       <div
         className={cn("max-w-[80%] space-y-1", side === "right" && "text-right")}

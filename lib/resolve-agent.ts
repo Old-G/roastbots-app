@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export interface ResolvedAgent {
   id: string;
   name: string;
-  initials: string;
+  emoji: string;
   tagline: string;
   color: string;
   isFighter: boolean;
@@ -37,7 +37,7 @@ export async function resolveAgent(agentId: string): Promise<ResolvedAgent> {
     return {
       id: fighter.id,
       name,
-      initials: name.slice(0, 2).toUpperCase(),
+      emoji: "🤖",
       tagline: fighter.persona?.slice(0, 60) ?? "OpenClaw Fighter",
       color: generateFighterColor(fighter.id),
       isFighter: true,
@@ -47,7 +47,7 @@ export async function resolveAgent(agentId: string): Promise<ResolvedAgent> {
   return {
     id: agentId,
     name: agentId,
-    initials: "??",
+    emoji: "❓",
     tagline: "Unknown fighter",
     color: "#888888",
     isFighter: true,

@@ -1,20 +1,20 @@
 import { cn } from "@/lib/utils";
 
 interface AgentAvatarProps {
-  initials: string;
+  emoji: string;
   color: string;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
 const sizeClasses = {
-  sm: "h-8 w-8 text-[10px]",
-  md: "h-12 w-12 text-sm",
-  lg: "h-16 w-16 text-base",
+  sm: "h-8 w-8 text-base",
+  md: "h-12 w-12 text-xl",
+  lg: "h-16 w-16 text-3xl",
 };
 
 export function AgentAvatar({
-  initials,
+  emoji,
   color,
   size = "md",
   className,
@@ -22,17 +22,16 @@ export function AgentAvatar({
   return (
     <div
       className={cn(
-        "flex items-center justify-center rounded-full font-bold font-mono tracking-wider",
+        "flex items-center justify-center rounded-full",
         sizeClasses[size],
         className
       )}
       style={{
         backgroundColor: `${color}15`,
         border: `1.5px solid ${color}30`,
-        color: color,
       }}
     >
-      {initials}
+      {emoji}
     </div>
   );
 }

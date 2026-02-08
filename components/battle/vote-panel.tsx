@@ -101,7 +101,7 @@ export function VotePanel() {
                   disabled={!!state.votedFor || isVoting}
                 >
                   <AgentAvatar
-                    initials={agent.initials}
+                    emoji={agent.emoji}
                     color={state.votedFor ? agent.color : "#ffffff"}
                     size="md"
                   />

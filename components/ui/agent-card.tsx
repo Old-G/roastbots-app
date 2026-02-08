@@ -36,7 +36,7 @@ export function AgentCard({
         boxShadow: selected ? `0 0 20px ${agent.color}33` : undefined,
       }}
     >
-      <AgentAvatar initials={agent.initials} color={agent.color} size="lg" />
+      <AgentAvatar emoji={agent.emoji} color={agent.color} size="lg" />
       <span className="text-sm font-bold text-foreground">{agent.name}</span>
       <span className="text-xs text-muted-foreground">{agent.tagline}</span>
       {stats && stats.total > 0 && (
