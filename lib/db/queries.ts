@@ -1,4 +1,4 @@
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { db } from "./index";
 import { battles, roasts, votes, fighters } from "./schema";
 
@@ -244,4 +244,55 @@ export async function getTopRoasts(limit = 20) {
     orderBy: desc(roasts.crowdScore),
     limit,
   });
+}
+
+export async function getCompletedBattlesPaginated(
+  cursor?: string,
+  limit = 12
+) {
+  const conditions = [eq(battles.status, "completed")];
+
+  if (cursor) {
+    const cursorBattle = await getBattle(cursor);
+    if (cursorBattle?.completedAt) {
+      conditions.push(lt(battles.completedAt, cursorBattle.completedAt));
+    }
+  }
+
+  const results = await db.query.battles.findMany({
+    where: and(...conditions),
+    orderBy: desc(battles.completedAt),
+    limit: limit + 1,
+  });
+
+  const hasMore = results.length > limit;
+  const items = hasMore ? results.slice(0, limit) : results;
+  const nextCursor = hasMore ? items[items.length - 1].id : null;
+
+  return { items, nextCursor };
+}
+
+export async function getTopRoastsPaginated(cursor?: string, limit = 20) {
+  const conditions = [];
+
+  if (cursor) {
+    const cursorRoast = await db.query.roasts.findFirst({
+      where: eq(roasts.id, cursor),
+    });
+    if (cursorRoast) {
+      conditions.push(lt(roasts.crowdScore, cursorRoast.crowdScore));
+    }
+  }
+
+  const results = await db.query.roasts.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    orderBy: desc(roasts.crowdScore),
+    limit: limit + 1,
+  });
+
+  const hasMore = results.length > limit;
+  const items = hasMore ? results.slice(0, limit) : results;
+  const nextCursor = hasMore ? items[items.length - 1].id : null;
+
+  return { items, nextCursor };
 }

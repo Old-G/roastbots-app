@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
-import { AGENTS, type AgentId } from "@/lib/agents";
-import { getTopRoasts } from "@/lib/db/queries";
+import { getTopRoastsPaginated } from "@/lib/db/queries";
+import { resolveAgents } from "@/lib/resolve-agent";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const limit = Math.min(Number(searchParams.get("limit") ?? 20), 50);
+  const cursor = searchParams.get("cursor") ?? undefined;
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 50);
 
-  const topRoasts = await getTopRoasts(limit);
+  const paginated = await getTopRoastsPaginated(cursor, limit);
 
-  const enriched = topRoasts.map((roast) => ({
-    ...roast,
-    agent: AGENTS[roast.agentId as AgentId],
-  }));
+  const agentIds = [...new Set(paginated.items.map((r) => r.agentId))];
+  const agents = await resolveAgents(agentIds);
 
-  return NextResponse.json(enriched);
+  return NextResponse.json({
+    roasts: paginated.items,
+    agents,
+    nextCursor: paginated.nextCursor,
+  });
 }

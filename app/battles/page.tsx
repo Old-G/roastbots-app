@@ -1,28 +1,29 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { BackButton } from "@/components/ui/back-button";
-import { getCompletedBattles, getActiveBattles } from "@/lib/db/queries";
-import { resolveAgents, type ResolvedAgent } from "@/lib/resolve-agent";
+import { getActiveBattles, getCompletedBattlesPaginated } from "@/lib/db/queries";
+import { resolveAgents } from "@/lib/resolve-agent";
+import { BattleListInfinite } from "@/components/battle-list-infinite";
 
 export const metadata = {
   title: "All Battles | RoastBots.org",
 };
 
 export default async function BattlesPage() {
-  const [active, completed] = await Promise.all([
+  const [active, paginated] = await Promise.all([
     getActiveBattles(),
-    getCompletedBattles(100),
+    getCompletedBattlesPaginated(undefined, 12),
   ]);
 
   const allBattles = [
-    ...active.map((b) => ({ ...b, isLive: true })),
-    ...completed.map((b) => ({ ...b, isLive: false })),
+    ...active.map((b) => ({ ...b, isLive: true as const })),
+    ...paginated.items.map((b) => ({ ...b, isLive: false as const })),
   ];
 
-  const allIds = allBattles.flatMap((b) => [b.agent1Id, b.agent2Id]);
+  const allIds = [
+    ...allBattles.flatMap((b) => [b.agent1Id, b.agent2Id]),
+    ...allBattles.map((b) => b.winnerId).filter(Boolean) as string[],
+  ];
   const agentMap = await resolveAgents(allIds);
 
   return (
@@ -35,46 +36,11 @@ export default async function BattlesPage() {
           No battles yet.
         </p>
       ) : (
-        <div className="space-y-4">
-          {allBattles.map((battle) => {
-            const a1 = agentMap[battle.agent1Id];
-            const a2 = agentMap[battle.agent2Id];
-            if (!a1 || !a2) return null;
-
-            return (
-              <Link
-                key={battle.id}
-                href={`/battle/${battle.id}`}
-                className="block rounded-xl border bg-card/60 p-6 transition-colors hover:border-muted-foreground/30"
-              >
-                <div className="flex items-center gap-4">
-                  <AgentAvatar emoji={a1.emoji} color={a1.color} size="lg" />
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold" style={{ color: a1.color }}>
-                      {a1.name}
-                    </span>
-                    <span className="text-sm text-muted-foreground font-bold">vs</span>
-                    <span className="text-lg font-bold" style={{ color: a2.color }}>
-                      {a2.name}
-                    </span>
-                  </div>
-                  <AgentAvatar emoji={a2.emoji} color={a2.color} size="lg" />
-                  {battle.isLive && (
-                    <Badge variant="destructive" className="ml-auto">LIVE</Badge>
-                  )}
-                </div>
-                <p className="mt-3 text-muted-foreground">
-                  {battle.topic}
-                </p>
-                {battle.winnerId && (
-                  <p className="mt-1 font-medium" style={{ color: agentMap[battle.winnerId]?.color }}>
-                    Winner: {agentMap[battle.winnerId]?.name}
-                  </p>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+        <BattleListInfinite
+          initialBattles={allBattles}
+          initialAgents={agentMap}
+          initialCursor={paginated.nextCursor}
+        />
       )}
     </main>
   );

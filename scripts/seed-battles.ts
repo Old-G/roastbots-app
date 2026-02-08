@@ -1,10 +1,12 @@
 /**
- * Seed script: generates 15 battles (all C(6,2) house-bot pairs).
+ * Seed script: generates battles between arena bots.
  *
  * Usage (from roastbots_app/):
- *   npx tsx scripts/seed-battles.ts
+ *   npx tsx scripts/seed-battles.ts          # default 15 battles
+ *   npx tsx scripts/seed-battles.ts 20       # generate 20 battles
+ *   npx tsx scripts/seed-battles.ts --fresh  # delete all existing battles first
  *
- * Requires .env with DATABASE_URL and OPENAI_API_KEY.
+ * Requires .env.local with DATABASE_URL and OPENAI_API_KEY.
  */
 
 import "dotenv/config";
@@ -33,7 +35,7 @@ function generateRoastId() {
   return `rst_${nanoid(12)}`;
 }
 
-function generateAllPairs(): Array<{
+function generateRandomPairs(count: number): Array<{
   agent1: AgentId;
   agent2: AgentId;
   topic: string;
@@ -41,20 +43,17 @@ function generateAllPairs(): Array<{
   const agentIds = Object.keys(AGENTS) as AgentId[];
   const plans: Array<{ agent1: AgentId; agent2: AgentId; topic: string }> = [];
 
-  for (let i = 0; i < agentIds.length; i++) {
-    for (let j = i + 1; j < agentIds.length; j++) {
-      plans.push({
-        agent1: agentIds[i],
-        agent2: agentIds[j],
-        topic: TOPICS[Math.floor(Math.random() * TOPICS.length)],
-      });
-    }
-  }
+  for (let i = 0; i < count; i++) {
+    // Pick two random different agents
+    const idx1 = Math.floor(Math.random() * agentIds.length);
+    let idx2 = Math.floor(Math.random() * (agentIds.length - 1));
+    if (idx2 >= idx1) idx2++;
 
-  // Shuffle
-  for (let i = plans.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [plans[i], plans[j]] = [plans[j], plans[i]];
+    plans.push({
+      agent1: agentIds[idx1],
+      agent2: agentIds[idx2],
+      topic: TOPICS[Math.floor(Math.random() * TOPICS.length)],
+    });
   }
 
   return plans;
@@ -86,7 +85,8 @@ async function generateRoastText(
 async function seedBattle(
   plan: { agent1: AgentId; agent2: AgentId; topic: string },
   index: number,
-  total: number
+  total: number,
+  markFeatured: boolean
 ) {
   const battleId = generateBattleId();
   const a1 = AGENTS[plan.agent1];
@@ -95,14 +95,13 @@ async function seedBattle(
     `\n[${index + 1}/${total}] ${a1.name} vs ${a2.name} — "${plan.topic}"`
   );
 
-  // Create battle
   await db.insert(battles).values({
     id: battleId,
     agent1Id: plan.agent1,
     agent2Id: plan.agent2,
     topic: plan.topic,
     status: "in_progress",
-    isFeatured: index === 0,
+    isFeatured: markFeatured,
   });
 
   const previousRoasts: RoastMessage[] = [];
@@ -158,11 +157,13 @@ async function seedBattle(
     }
   }
 
-  // Complete battle
   const winnerId =
-    scores.agent1 > scores.agent2 ? plan.agent1 : plan.agent2;
+    scores.agent1 > scores.agent2
+      ? plan.agent1
+      : scores.agent1 < scores.agent2
+        ? plan.agent2
+        : null;
 
-  // Random completedAt in the past week
   const daysAgo = Math.random() * 7;
   const completedAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
 
@@ -175,28 +176,40 @@ async function seedBattle(
     })
     .where(eq(battles.id, battleId));
 
+  const winnerName = winnerId ? AGENTS[winnerId].name : "DRAW";
   console.log(
-    `  Winner: ${AGENTS[winnerId].name} (${scores.agent1} vs ${scores.agent2})`
+    `  Winner: ${winnerName} (${scores.agent1} vs ${scores.agent2})`
   );
 }
 
 async function main() {
-  console.log("Seeding RoastBots battles...\n");
+  const args = process.argv.slice(2);
+  const isFresh = args.includes("--fresh");
+  const countArg = args.find((a) => !a.startsWith("--"));
+  const count = countArg ? parseInt(countArg, 10) : 15;
 
-  // Check existing battles
-  const existing = await db.query.battles.findMany();
-  if (existing.length > 0) {
-    console.log(`DB already has ${existing.length} battles. Skipping seed.`);
-    console.log("To re-seed, delete existing battles first.");
-    process.exit(0);
+  if (isNaN(count) || count < 1) {
+    console.error("Invalid count. Usage: npx tsx scripts/seed-battles.ts [count] [--fresh]");
+    process.exit(1);
   }
 
-  const plans = generateAllPairs();
-  console.log(`Generating ${plans.length} battles (all house-bot pairs)...\n`);
+  console.log("Seeding RoastBots battles...\n");
+
+  if (isFresh) {
+    console.log("--fresh: Deleting all existing roasts and battles...");
+    await db.delete(roasts);
+    await db.delete(battles);
+    console.log("Cleared.\n");
+  }
+
+  const existing = await db.query.battles.findMany();
+  const needsFeatured = existing.length === 0;
+
+  const plans = generateRandomPairs(count);
+  console.log(`Generating ${plans.length} battles...\n`);
 
   for (let i = 0; i < plans.length; i++) {
-    await seedBattle(plans[i], i, plans.length);
-    // Small delay between battles to avoid rate limiting
+    await seedBattle(plans[i], i, plans.length, needsFeatured && i === 0);
     if (i < plans.length - 1) {
       await new Promise((r) => setTimeout(r, 1000));
     }

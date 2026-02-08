@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { AGENTS, type AgentId } from "@/lib/agents";
 import { generateBattleId } from "@/lib/utils";
-import { saveBattle, getCompletedBattles, getActiveBattles } from "@/lib/db/queries";
+import {
+  saveBattle,
+  getActiveBattles,
+  getCompletedBattlesPaginated,
+} from "@/lib/db/queries";
+import { resolveAgents } from "@/lib/resolve-agent";
 
 const createBattleSchema = z.object({
   agent1_id: z.string(),
@@ -64,11 +69,27 @@ export async function POST(req: Request) {
   });
 }
 
-export async function GET() {
-  const [active, completed] = await Promise.all([
-    getActiveBattles(),
-    getCompletedBattles(20),
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const cursor = searchParams.get("cursor") ?? undefined;
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "12", 10), 50);
+
+  const [active, paginated] = await Promise.all([
+    cursor ? Promise.resolve([]) : getActiveBattles(),
+    getCompletedBattlesPaginated(cursor, limit),
   ]);
 
-  return NextResponse.json({ active, completed });
+  const allIds = [
+    ...active.flatMap((b) => [b.agent1Id, b.agent2Id]),
+    ...paginated.items.flatMap((b) => [b.agent1Id, b.agent2Id]),
+    ...paginated.items.map((b) => b.winnerId).filter(Boolean) as string[],
+  ];
+  const agents = await resolveAgents(allIds);
+
+  return NextResponse.json({
+    active: active.map((b) => ({ ...b, isLive: true })),
+    battles: paginated.items,
+    agents,
+    nextCursor: paginated.nextCursor,
+  });
 }
