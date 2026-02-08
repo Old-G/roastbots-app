@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { AGENTS, type AgentId } from "@/lib/agents";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { Badge } from "@/components/ui/badge";
 
 interface RoastBubbleProps {
@@ -31,7 +32,7 @@ export function RoastBubble({
       )}
     >
       <div className="flex-shrink-0 pt-1">
-        <span className="text-2xl">{agent.avatar}</span>
+        <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
       </div>
       <div
         className={cn("max-w-[80%] space-y-1", side === "right" && "text-right")}
@@ -74,7 +75,7 @@ export function RoastBubble({
                   : undefined
               }
             >
-              {isFatality ? "\u{1F480}" : crowdScore >= 85 ? "\u{1F525}" : "\u{1F3A4}"}{" "}
+              {isFatality ? "FATAL " : crowdScore >= 85 ? "FIRE " : ""}
               {crowdScore}
             </Badge>
             {isFatality && (

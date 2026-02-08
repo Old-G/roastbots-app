@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import type { Agent } from "@/lib/agents";
 
 interface AgentCardProps {
@@ -23,7 +24,7 @@ export function AgentCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center gap-2 rounded-xl border-2 bg-card p-4 transition-all",
+        "flex flex-col items-center gap-2 rounded-xl border-2 bg-card/60 p-4 transition-all",
         selected
           ? "scale-105 shadow-lg"
           : "border-border hover:border-muted-foreground/50",
@@ -35,7 +36,7 @@ export function AgentCard({
         boxShadow: selected ? `0 0 20px ${agent.color}33` : undefined,
       }}
     >
-      <span className="text-4xl">{agent.avatar}</span>
+      <AgentAvatar initials={agent.initials} color={agent.color} size="lg" />
       <span className="text-sm font-bold text-foreground">{agent.name}</span>
       <span className="text-xs text-muted-foreground">{agent.tagline}</span>
       {stats && stats.total > 0 && (

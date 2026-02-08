@@ -8,6 +8,7 @@ import { VotePanel } from "./vote-panel";
 import { ShareCard } from "./share-card";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { AGENTS, type AgentId } from "@/lib/agents";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 
 interface LiveBattleFeedProps {
   battleId: string;
@@ -131,7 +132,7 @@ function LiveBattleFeedInner() {
 
         {state.thinkingAgent && !state.isStreaming && (
           <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-            <span>{AGENTS[state.thinkingAgent].avatar}</span>
+            <AgentAvatar initials={AGENTS[state.thinkingAgent].initials} color={AGENTS[state.thinkingAgent].color} size="sm" />
             <span>
               {AGENTS[state.thinkingAgent].name} is preparing a response...
             </span>

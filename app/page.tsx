@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { AGENTS, type AgentId } from "@/lib/agents";
 import {
   getFeaturedBattle,
@@ -13,22 +14,25 @@ import {
 
 export default function HomePage() {
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-8">
-      <section className="mb-12 text-center">
-        <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-          AI Roast Battle Arena
+    <main className="container mx-auto max-w-4xl px-4 sm:px-6 py-8">
+      {/* Hero */}
+      <section className="mb-12 text-center pt-8 pb-4">
+        <h1 className="text-4xl font-black tracking-tighter sm:text-5xl">
+          AI Roast Battle{" "}
+          <span className="text-gradient-primary">Arena</span>
         </h1>
-        <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+        <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
           Watch AI models destroy each other in real-time roast battles.
           Pick your fighters, choose a topic, and let the chaos begin.
         </p>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button asChild size="lg">
+        <div className="mt-8">
+          <Button asChild size="lg" className="glow-primary">
             <Link href="/battle/new">Start a Battle</Link>
           </Button>
         </div>
       </section>
 
+      {/* Battles */}
       <Suspense
         fallback={
           <div className="py-8 text-center text-muted-foreground">
@@ -38,6 +42,38 @@ export default function HomePage() {
       >
         <BattlesList />
       </Suspense>
+
+      {/* Agent Roster */}
+      <section className="mt-16">
+        <h2 className="mb-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Meet the Fighters
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {Object.values(AGENTS).map((agent) => (
+            <div
+              key={agent.id}
+              className="flex items-center gap-3 rounded-xl border bg-card/60 p-4 transition-colors hover:border-muted-foreground/30"
+            >
+              <AgentAvatar
+                initials={agent.initials}
+                color={agent.color}
+                size="sm"
+              />
+              <div className="min-w-0">
+                <p
+                  className="text-sm font-semibold truncate"
+                  style={{ color: agent.color }}
+                >
+                  {agent.name}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {agent.tagline}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
@@ -51,15 +87,7 @@ async function BattlesList() {
       getCompletedBattles(10),
     ]);
   } catch {
-    return (
-      <div className="py-12 text-center text-muted-foreground">
-        No battles yet. Be the first to{" "}
-        <Link href="/battle/new" className="text-primary hover:underline">
-          start one
-        </Link>
-        !
-      </div>
-    );
+    return <EmptyState />;
   }
 
   const allBattles = [
@@ -67,48 +95,87 @@ async function BattlesList() {
     ...recent.map((b) => ({ ...b, isLive: false })),
   ];
 
-  if (featured) {
-    const a1 = AGENTS[featured.agent1Id as AgentId];
-    const a2 = AGENTS[featured.agent2Id as AgentId];
-
-    return (
-      <>
-        <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Featured Battle
-          </h2>
-          <Link
-            href={`/battle/${featured.id}`}
-            className="block rounded-xl border border-primary/30 bg-card p-6 transition-colors hover:border-primary/60"
-          >
-            <div className="flex items-center justify-center gap-4">
-              <span className="text-3xl">{a1.avatar}</span>
-              <span
-                className="font-bold"
-                style={{ color: a1.color }}
-              >
-                {a1.name}
-              </span>
-              <span className="text-muted-foreground">vs</span>
-              <span
-                className="font-bold"
-                style={{ color: a2.color }}
-              >
-                {a2.name}
-              </span>
-              <span className="text-3xl">{a2.avatar}</span>
-            </div>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              {featured.topic}
-            </p>
-          </Link>
-        </section>
-        <BattleGrid battles={allBattles} />
-      </>
-    );
+  if (!featured && allBattles.length === 0) {
+    return <EmptyState />;
   }
 
-  return <BattleGrid battles={allBattles} />;
+  return (
+    <>
+      {featured && <FeaturedBattle battle={featured} />}
+      {allBattles.length > 0 && <BattleGrid battles={allBattles} />}
+    </>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-2xl border bg-card/60 p-12 text-center">
+      <div className="mx-auto mb-4 flex items-center justify-center gap-2">
+        {Object.values(AGENTS)
+          .slice(0, 3)
+          .map((a) => (
+            <AgentAvatar
+              key={a.id}
+              initials={a.initials}
+              color={a.color}
+              size="sm"
+            />
+          ))}
+      </div>
+      <h3 className="text-lg font-bold mb-2">No battles yet</h3>
+      <p className="text-sm text-muted-foreground mb-6">
+        Be the first to start an AI roast battle.
+      </p>
+      <Button asChild>
+        <Link href="/battle/new">Start the First Battle</Link>
+      </Button>
+    </div>
+  );
+}
+
+function FeaturedBattle({
+  battle,
+}: {
+  battle: {
+    id: string;
+    agent1Id: string;
+    agent2Id: string;
+    topic: string;
+  };
+}) {
+  const a1 = AGENTS[battle.agent1Id as AgentId];
+  const a2 = AGENTS[battle.agent2Id as AgentId];
+
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        Featured Battle
+      </h2>
+      <Link
+        href={`/battle/${battle.id}`}
+        className="block rounded-xl border border-primary/30 bg-card/60 p-6 transition-colors hover:border-primary/60"
+      >
+        <div className="flex items-center justify-center gap-4">
+          <AgentAvatar initials={a1.initials} color={a1.color} size="lg" />
+          <div className="text-center">
+            <div className="flex items-center gap-3">
+              <span className="font-bold" style={{ color: a1.color }}>
+                {a1.name}
+              </span>
+              <span className="text-xs text-muted-foreground font-bold">VS</span>
+              <span className="font-bold" style={{ color: a2.color }}>
+                {a2.name}
+              </span>
+            </div>
+          </div>
+          <AgentAvatar initials={a2.initials} color={a2.color} size="lg" />
+        </div>
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          {battle.topic}
+        </p>
+      </Link>
+    </section>
+  );
 }
 
 function BattleGrid({
@@ -123,18 +190,6 @@ function BattleGrid({
     isLive: boolean;
   }>;
 }) {
-  if (battles.length === 0) {
-    return (
-      <div className="py-12 text-center text-muted-foreground">
-        No battles yet. Be the first to{" "}
-        <Link href="/battle/new" className="text-primary hover:underline">
-          start one
-        </Link>
-        !
-      </div>
-    );
-  }
-
   return (
     <section>
       <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -149,15 +204,21 @@ function BattleGrid({
             <Link
               key={battle.id}
               href={`/battle/${battle.id}`}
-              className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-muted-foreground/50"
+              className="rounded-xl border bg-card/60 p-4 transition-colors hover:border-muted-foreground/30"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span>{a1.avatar}</span>
-                  <span className="text-xs font-semibold">{a1.name}</span>
+                  <AgentAvatar
+                    initials={a1.initials}
+                    color={a1.color}
+                    size="sm"
+                  />
                   <span className="text-xs text-muted-foreground">vs</span>
-                  <span className="text-xs font-semibold">{a2.name}</span>
-                  <span>{a2.avatar}</span>
+                  <AgentAvatar
+                    initials={a2.initials}
+                    color={a2.color}
+                    size="sm"
+                  />
                 </div>
                 {battle.isLive && (
                   <Badge variant="destructive" className="text-xs">
@@ -165,7 +226,7 @@ function BattleGrid({
                   </Badge>
                 )}
               </div>
-              <p className="mt-1 truncate text-xs text-muted-foreground">
+              <p className="mt-2 truncate text-xs text-muted-foreground">
                 {battle.topic}
               </p>
             </Link>

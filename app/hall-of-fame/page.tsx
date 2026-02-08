@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getTopRoasts } from "@/lib/db/queries";
 import { AGENTS, type AgentId } from "@/lib/agents";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
@@ -37,7 +38,7 @@ export default async function HallOfFamePage() {
                   <span className="text-sm font-mono text-muted-foreground">
                     #{i + 1}
                   </span>
-                  <span className="text-lg">{agent?.avatar}</span>
+                  {agent && <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />}
                   <span
                     className="text-sm font-bold"
                     style={{ color: agent?.color }}
@@ -49,7 +50,7 @@ export default async function HallOfFamePage() {
                   <Badge
                     variant={roast.isFatality ? "destructive" : "secondary"}
                   >
-                    {roast.isFatality ? "\u{1F480} FATALITY" : `\u{1F525} ${roast.crowdScore}`}
+                    {roast.isFatality ? "FATALITY" : `FIRE ${roast.crowdScore}`}
                   </Badge>
                 </div>
               </div>

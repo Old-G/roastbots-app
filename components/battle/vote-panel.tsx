@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { useBattle } from "./battle-context";
 import { cn } from "@/lib/utils";
 import type { AgentId } from "@/lib/agents";
@@ -62,7 +63,6 @@ export function VotePanel() {
         <h3 className="text-lg font-bold">
           {judgeWinner ? (
             <>
-              {"\u{1F451}"}{" "}
               <span style={{ color: judgeWinner.color }}>
                 {judgeWinner.name}
               </span>{" "}
@@ -101,7 +101,7 @@ export function VotePanel() {
                   onClick={() => handleVote(agent.id as AgentId)}
                   disabled={!!state.votedFor || isVoting}
                 >
-                  <span className="text-3xl">{agent.avatar}</span>
+                  <AgentAvatar initials={agent.initials} color={agent.color} size="md" />
                   <span className="text-sm font-bold">{agent.name}</span>
                 </Button>
 

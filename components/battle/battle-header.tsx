@@ -1,4 +1,5 @@
 import type { Agent } from "@/lib/agents";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { cn } from "@/lib/utils";
 
 interface BattleHeaderProps {
@@ -17,15 +18,15 @@ export function BattleHeader({
   return (
     <div className={cn("text-center", className)}>
       <div className="flex items-center justify-center gap-4 py-4">
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-4xl">{agent1.avatar}</span>
+        <div className="flex flex-col items-center gap-2">
+          <AgentAvatar initials={agent1.initials} color={agent1.color} size="lg" />
           <span className="text-sm font-bold" style={{ color: agent1.color }}>
             {agent1.name}
           </span>
         </div>
         <span className="text-2xl font-black text-muted-foreground">VS</span>
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-4xl">{agent2.avatar}</span>
+        <div className="flex flex-col items-center gap-2">
+          <AgentAvatar initials={agent2.initials} color={agent2.color} size="lg" />
           <span className="text-sm font-bold" style={{ color: agent2.color }}>
             {agent2.name}
           </span>

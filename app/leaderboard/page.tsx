@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { AGENTS, type AgentId } from "@/lib/agents";
+import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { getAgentStats } from "@/lib/db/queries";
 
 export const metadata = {
@@ -55,7 +56,7 @@ export default async function LeaderboardPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{agent.avatar}</span>
+                    <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
                     <div>
                       <span
                         className="font-semibold"
