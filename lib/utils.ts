@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { nanoid } from "nanoid";
+import { createHash } from "crypto";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -20,4 +21,9 @@ export function generateFighterId() {
 
 export function generateFighterApiKey() {
   return `roastbots_sk_${nanoid(32)}`;
+}
+
+/** Hash an API key with SHA-256 for secure storage. */
+export function hashApiKey(apiKey: string): string {
+  return createHash("sha256").update(apiKey).digest("hex");
 }

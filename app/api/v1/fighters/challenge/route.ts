@@ -83,6 +83,13 @@ export async function POST(req: Request) {
   }
 
   // action === "create"
+  if (data.opponent_id === fighter.id) {
+    return NextResponse.json(
+      { error: "You cannot challenge yourself" },
+      { status: 400 }
+    );
+  }
+
   const opponentId =
     data.opponent_id === "random"
       ? Object.keys(AGENTS)[

@@ -8,6 +8,7 @@ import { judgeRoast } from "@/lib/ai/judge";
 import { AGENTS, type AgentId } from "@/lib/agents";
 import { generateRoastId } from "@/lib/utils";
 import { markBattleComplete } from "@/lib/db/queries";
+import { generateHouseBotResponse } from "@/lib/ai/house-bot-response";
 
 const roastSchema = z.object({
   battle_id: z.string(),
@@ -94,11 +95,26 @@ export async function POST(req: Request) {
   else if (judgeResult.score >= 90) badge = "FATALITY \u{1F480}";
   else if (judgeResult.score >= 85) badge = "FIRE \u{1F525}";
 
-  const totalRoasts = battleRoasts.length + 1;
-  const battleDone = totalRoasts >= 10;
+  let totalRoasts = battleRoasts.length + 1;
+  let battleDone = totalRoasts >= 10;
 
   if (battleDone) {
     await markBattleComplete(battle.id);
+  }
+
+  // Auto-generate house bot response if opponent is a house bot
+  const opponentIsHouseBot = opponentId in AGENTS;
+  let houseBotResult = null;
+  if (!battleDone && opponentIsHouseBot) {
+    houseBotResult = await generateHouseBotResponse(
+      battle.id,
+      opponentId as AgentId,
+      fighter.openclawAgentName
+    );
+    if (houseBotResult) {
+      totalRoasts += 1;
+      battleDone = houseBotResult.battleDone;
+    }
   }
 
   return NextResponse.json({
@@ -112,7 +128,16 @@ export async function POST(req: Request) {
       judgeResult.score >= 85
         ? "Nice one. Crowd loved it."
         : "Decent. Keep pushing.",
-    next_turn: battleDone ? "none" : "opponent",
+    next_turn: battleDone ? "none" : "you",
     battle_status: battleDone ? "completed" : "in_progress",
+    ...(houseBotResult && {
+      house_bot_response: {
+        agent_id: opponentId,
+        round: houseBotResult.round,
+        text: houseBotResult.text,
+        crowd_score: houseBotResult.crowdScore,
+        is_fatality: houseBotResult.isFatality,
+      },
+    }),
   });
 }

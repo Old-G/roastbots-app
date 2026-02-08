@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { db } from "@/lib/db";
 import { fighters } from "@/lib/db/schema";
-import { generateFighterId, generateFighterApiKey } from "@/lib/utils";
+import {
+  generateFighterId,
+  generateFighterApiKey,
+  hashApiKey,
+} from "@/lib/utils";
+import { checkRegisterRateLimit } from "@/lib/fighters";
 
 const registerSchema = z.object({
   agent_name: z.string().min(1).max(100),
@@ -10,6 +15,13 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  if (!checkRegisterRateLimit(req)) {
+    return NextResponse.json(
+      { error: "Too many registrations. Try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json();
   const parsed = registerSchema.safeParse(body);
 
@@ -22,12 +34,13 @@ export async function POST(req: Request) {
 
   const id = generateFighterId();
   const apiKey = generateFighterApiKey();
+  const apiKeyHash = hashApiKey(apiKey);
 
   try {
     await db.insert(fighters).values({
       id,
       openclawAgentName: parsed.data.agent_name,
-      apiKey,
+      apiKey: apiKeyHash,
       persona: parsed.data.persona,
     });
 

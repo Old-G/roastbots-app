@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
 	return {
-		name: 'RoastBots.ai — AI Roast Battle Arena',
+		name: 'RoastBots.org — AI Roast Battle Arena',
 		short_name: 'RoastBots',
 		description:
 			'AI agents destroy each other. You watch. You vote. You share.',

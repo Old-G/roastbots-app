@@ -1,12 +1,19 @@
 "use client";
 
 import { createContext, use, useCallback, useMemo, useState } from "react";
-import type { AgentId, Agent } from "@/lib/agents";
-import { AGENTS } from "@/lib/agents";
+
+/** Minimal agent info needed by battle UI (works for both house bots and fighters). */
+export interface BattleAgent {
+  id: string;
+  name: string;
+  initials: string;
+  tagline: string;
+  color: string;
+}
 
 export interface Roast {
   id: string;
-  agentId: AgentId;
+  agentId: string;
   round: number;
   text: string;
   crowdScore: number;
@@ -21,11 +28,11 @@ export interface VoteResults {
 interface BattleState {
   roasts: Roast[];
   currentStreamingText: string;
-  currentAgentId: AgentId | null;
+  currentAgentId: string | null;
   isStreaming: boolean;
   isComplete: boolean;
-  thinkingAgent: AgentId | null;
-  votedFor: AgentId | null;
+  thinkingAgent: string | null;
+  votedFor: string | null;
   voteResults: VoteResults | null;
   winner: string | null;
 }
@@ -33,18 +40,20 @@ interface BattleState {
 interface BattleActions {
   addRoast: (roast: Roast) => void;
   setStreamingText: (text: string) => void;
-  setCurrentAgent: (agentId: AgentId | null) => void;
+  setCurrentAgent: (agentId: string | null) => void;
   setStreaming: (streaming: boolean) => void;
   setComplete: (winner: string | null) => void;
-  setThinkingAgent: (agentId: AgentId | null) => void;
-  setVote: (agentId: AgentId, results: VoteResults, winner: string | null) => void;
+  setThinkingAgent: (agentId: string | null) => void;
+  setVote: (agentId: string, results: VoteResults, winner: string | null) => void;
 }
 
 interface BattleMeta {
   battleId: string;
   topic: string;
-  agent1: Agent;
-  agent2: Agent;
+  agent1: BattleAgent;
+  agent2: BattleAgent;
+  /** Look up agent by ID (returns agent1 or agent2). */
+  getAgent: (id: string) => BattleAgent;
 }
 
 interface BattleContextValue {
@@ -64,8 +73,8 @@ export function useBattle(): BattleContextValue {
 interface BattleProviderProps {
   battleId: string;
   topic: string;
-  agent1Id: AgentId;
-  agent2Id: AgentId;
+  agent1: BattleAgent;
+  agent2: BattleAgent;
   initialRoasts?: Roast[];
   initialComplete?: boolean;
   initialWinner?: string | null;
@@ -76,8 +85,8 @@ interface BattleProviderProps {
 export function BattleProvider({
   battleId,
   topic,
-  agent1Id,
-  agent2Id,
+  agent1,
+  agent2,
   initialRoasts = [],
   initialComplete = false,
   initialWinner = null,
@@ -86,11 +95,11 @@ export function BattleProvider({
 }: BattleProviderProps) {
   const [roasts, setRoasts] = useState<Roast[]>(initialRoasts);
   const [currentStreamingText, setCurrentStreamingText] = useState("");
-  const [currentAgentId, setCurrentAgentId] = useState<AgentId | null>(null);
+  const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isComplete, setIsComplete] = useState(initialComplete);
-  const [thinkingAgent, setThinkingAgent] = useState<AgentId | null>(null);
-  const [votedFor, setVotedFor] = useState<AgentId | null>(null);
+  const [thinkingAgent, setThinkingAgent] = useState<string | null>(null);
+  const [votedFor, setVotedFor] = useState<string | null>(null);
   const [voteResults, setVoteResults] = useState<VoteResults | null>(
     initialVoteResults
   );
@@ -103,7 +112,7 @@ export function BattleProvider({
   const setStreamingTextFn = useCallback((text: string) => {
     setCurrentStreamingText(text);
   }, []);
-  const setCurrentAgentFn = useCallback((agentId: AgentId | null) => {
+  const setCurrentAgentFn = useCallback((agentId: string | null) => {
     setCurrentAgentId(agentId);
   }, []);
   const setStreamingFn = useCallback((streaming: boolean) => {
@@ -115,11 +124,11 @@ export function BattleProvider({
     setThinkingAgent(null);
     setWinner(winId);
   }, []);
-  const setThinkingAgentFn = useCallback((agentId: AgentId | null) => {
+  const setThinkingAgentFn = useCallback((agentId: string | null) => {
     setThinkingAgent(agentId);
   }, []);
   const setVoteFn = useCallback(
-    (agentId: AgentId, results: VoteResults, winId: string | null) => {
+    (agentId: string, results: VoteResults, winId: string | null) => {
       setVotedFor(agentId);
       setVoteResults(results);
       setWinner(winId);
@@ -144,10 +153,11 @@ export function BattleProvider({
     () => ({
       battleId,
       topic,
-      agent1: AGENTS[agent1Id],
-      agent2: AGENTS[agent2Id],
+      agent1,
+      agent2,
+      getAgent: (id: string) => (id === agent1.id ? agent1 : agent2),
     }),
-    [battleId, topic, agent1Id, agent2Id]
+    [battleId, topic, agent1, agent2]
   );
 
   return (

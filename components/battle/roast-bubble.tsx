@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AGENTS, type AgentId } from "@/lib/agents";
+import { useBattle } from "./battle-context";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { Badge } from "@/components/ui/badge";
 
 interface RoastBubbleProps {
-  agentId: AgentId;
+  agentId: string;
   text: string;
   crowdScore?: number;
   isFatality?: boolean;
@@ -22,7 +22,8 @@ export function RoastBubble({
   isStreaming,
   side,
 }: RoastBubbleProps) {
-  const agent = AGENTS[agentId];
+  const { meta } = useBattle();
+  const agent = meta.getAgent(agentId);
 
   return (
     <div

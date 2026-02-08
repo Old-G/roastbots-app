@@ -68,13 +68,21 @@ const SHARED_RULES = `RULES:
 
 export function getAgentSystemPrompt(
   agentId: AgentId,
-  opponentId: AgentId,
+  opponentIdOrName: AgentId | string,
   topic: string
 ): string {
-  const opponent = AGENTS[opponentId];
+  const opponentName =
+    opponentIdOrName in AGENTS
+      ? AGENTS[opponentIdOrName as AgentId].name
+      : opponentIdOrName;
+  const opponentTagline =
+    opponentIdOrName in AGENTS
+      ? AGENTS[opponentIdOrName as AgentId].tagline
+      : "OpenClaw Fighter";
+
   return `${PERSONA_PROMPTS[agentId]}
 
-You are in a roast battle. Your opponent is ${opponent.name} (${opponent.tagline}). The topic is: "${topic}".
+You are in a roast battle. Your opponent is ${opponentName} (${opponentTagline}). The topic is: "${topic}".
 
 ${SHARED_RULES}`;
 }

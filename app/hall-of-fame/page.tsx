@@ -1,16 +1,19 @@
 export const dynamic = "force-dynamic";
 
 import { getTopRoasts } from "@/lib/db/queries";
-import { AGENTS, type AgentId } from "@/lib/agents";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { Badge } from "@/components/ui/badge";
+import { resolveAgents } from "@/lib/resolve-agent";
 
 export const metadata = {
-  title: "Hall of Fame | RoastBots.ai",
+  title: "Hall of Fame | RoastBots.org",
 };
 
 export default async function HallOfFamePage() {
   const topRoasts = await getTopRoasts(20);
+
+  const agentIds = [...new Set(topRoasts.map((r) => r.agentId))];
+  const agentMap = await resolveAgents(agentIds);
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8">
@@ -27,7 +30,7 @@ export default async function HallOfFamePage() {
         )}
 
         {topRoasts.map((roast, i) => {
-          const agent = AGENTS[roast.agentId as AgentId];
+          const agent = agentMap[roast.agentId];
           return (
             <div
               key={roast.id}

@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BattleProvider, useBattle, type Roast } from "./battle-context";
+import {
+  BattleProvider,
+  useBattle,
+  type Roast,
+  type BattleAgent,
+} from "./battle-context";
 import { BattleHeader } from "./battle-header";
 import { RoastBubble } from "./roast-bubble";
 import { VotePanel } from "./vote-panel";
 import { ShareCard } from "./share-card";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { AGENTS, type AgentId } from "@/lib/agents";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
 
 interface LiveBattleFeedProps {
   battleId: string;
-  agent1Id: AgentId;
-  agent2Id: AgentId;
+  agent1: BattleAgent;
+  agent2: BattleAgent;
   topic: string;
 }
 
@@ -22,8 +26,8 @@ export function LiveBattleFeed(props: LiveBattleFeedProps) {
     <BattleProvider
       battleId={props.battleId}
       topic={props.topic}
-      agent1Id={props.agent1Id}
-      agent2Id={props.agent2Id}
+      agent1={props.agent1}
+      agent2={props.agent2}
     >
       <LiveBattleFeedInner />
     </BattleProvider>
@@ -42,7 +46,7 @@ function LiveBattleFeedInner() {
 
     eventSource.addEventListener("roast_start", (e) => {
       const data = JSON.parse(e.data);
-      actions.setCurrentAgent(data.agent_id as AgentId);
+      actions.setCurrentAgent(data.agent_id as string);
       actions.setThinkingAgent(null);
       actions.setStreaming(true);
       streamingTextRef.current = "";
@@ -59,7 +63,7 @@ function LiveBattleFeedInner() {
       const data = JSON.parse(e.data);
       actions.addRoast({
         id: data.roast_id,
-        agentId: data.agent_id as AgentId,
+        agentId: data.agent_id as string,
         round: data.round,
         text: data.text,
         crowdScore: data.crowd_score,
@@ -71,7 +75,7 @@ function LiveBattleFeedInner() {
 
     eventSource.addEventListener("thinking", (e) => {
       const data = JSON.parse(e.data);
-      actions.setThinkingAgent(data.agent_id as AgentId);
+      actions.setThinkingAgent(data.agent_id as string);
     });
 
     eventSource.addEventListener("battle_complete", (e) => {
@@ -131,28 +135,35 @@ function LiveBattleFeedInner() {
         )}
 
         {state.thinkingAgent && !state.isStreaming && (
-          <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-            <AgentAvatar initials={AGENTS[state.thinkingAgent].initials} color={AGENTS[state.thinkingAgent].color} size="sm" />
-            <span>
-              {AGENTS[state.thinkingAgent].name} is preparing a response...
-            </span>
-            <span className="inline-flex gap-0.5">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
-              <span
-                className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground"
-                style={{ animationDelay: "0.1s" }}
-              />
-              <span
-                className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground"
-                style={{ animationDelay: "0.2s" }}
-              />
-            </span>
-          </div>
+          <ThinkingIndicator agentId={state.thinkingAgent} />
         )}
       </div>
 
       <VotePanel />
       <ShareCard />
+    </div>
+  );
+}
+
+function ThinkingIndicator({ agentId }: { agentId: string }) {
+  const { meta } = useBattle();
+  const agent = meta.getAgent(agentId);
+
+  return (
+    <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
+      <AgentAvatar initials={agent.initials} color={agent.color} size="sm" />
+      <span>{agent.name} is preparing a response...</span>
+      <span className="inline-flex gap-0.5">
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+        <span
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground"
+          style={{ animationDelay: "0.1s" }}
+        />
+        <span
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground"
+          style={{ animationDelay: "0.2s" }}
+        />
+      </span>
     </div>
   );
 }

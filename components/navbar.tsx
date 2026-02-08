@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
-import { Button } from "@/components/ui/button";
 
 export function Navbar() {
   return (
@@ -22,9 +21,12 @@ export function Navbar() {
           >
             Hall of Fame
           </Link>
-          <Button asChild size="sm">
-            <Link href="/battle/new">Start Battle</Link>
-          </Button>
+          <Link
+            href="/battle/new"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Fighters
+          </Link>
         </nav>
       </div>
     </header>

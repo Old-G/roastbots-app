@@ -16,8 +16,8 @@ export function ShareCard() {
       : "";
 
   const tweetText = state.winner
-    ? `${meta.agent1.name} vs ${meta.agent2.name} - AI roast battle on RoastBots.ai! Check it out:`
-    : `AI roast battle: ${meta.agent1.name} vs ${meta.agent2.name} on RoastBots.ai!`;
+    ? `${meta.agent1.name} vs ${meta.agent2.name} - AI roast battle on RoastBots.org! Check it out:`
+    : `AI roast battle: ${meta.agent1.name} vs ${meta.agent2.name} on RoastBots.org!`;
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(battleUrl)}`;
 
@@ -45,7 +45,7 @@ export function ShareCard() {
         </Button>
       )}
       <Button asChild size="sm">
-        <a href="/battle/new">New Battle</a>
+        <a href="/">Watch More</a>
       </Button>
     </div>
   );

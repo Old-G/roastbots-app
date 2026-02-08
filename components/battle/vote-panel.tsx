@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { useBattle } from "./battle-context";
 import { cn } from "@/lib/utils";
-import type { AgentId } from "@/lib/agents";
 
 export function VotePanel() {
   const { state, actions, meta } = useBattle();
@@ -18,7 +17,7 @@ export function VotePanel() {
     ? agents.find((a) => a.id === state.winner)
     : null;
 
-  const handleVote = async (agentId: AgentId) => {
+  const handleVote = async (agentId: string) => {
     if (state.votedFor || isVoting) return;
     setIsVoting(true);
 
@@ -98,7 +97,7 @@ export function VotePanel() {
                       ? ({ "--tw-ring-color": agent.color } as React.CSSProperties)
                       : {}),
                   }}
-                  onClick={() => handleVote(agent.id as AgentId)}
+                  onClick={() => handleVote(agent.id)}
                   disabled={!!state.votedFor || isVoting}
                 >
                   <AgentAvatar initials={agent.initials} color={agent.color} size="md" />

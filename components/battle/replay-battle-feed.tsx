@@ -4,18 +4,18 @@ import {
   BattleProvider,
   type Roast,
   type VoteResults,
+  type BattleAgent,
 } from "./battle-context";
 import { BattleHeader } from "./battle-header";
 import { RoastBubble } from "./roast-bubble";
 import { VotePanel } from "./vote-panel";
 import { ShareCard } from "./share-card";
 import { Badge } from "@/components/ui/badge";
-import { AGENTS, type AgentId } from "@/lib/agents";
 
 interface ReplayBattleFeedProps {
   battleId: string;
-  agent1Id: AgentId;
-  agent2Id: AgentId;
+  agent1: BattleAgent;
+  agent2: BattleAgent;
   topic: string;
   roasts: Roast[];
   winnerId: string | null;
@@ -25,8 +25,8 @@ interface ReplayBattleFeedProps {
 
 export function ReplayBattleFeed({
   battleId,
-  agent1Id,
-  agent2Id,
+  agent1,
+  agent2,
   topic,
   roasts,
   winnerId,
@@ -39,8 +39,8 @@ export function ReplayBattleFeed({
   const initialVoteResults: VoteResults | null =
     total > 0
       ? {
-          [agent1Id]: { votes: votesAgent1, percentage: pct1 },
-          [agent2Id]: { votes: votesAgent2, percentage: 100 - pct1 },
+          [agent1.id]: { votes: votesAgent1, percentage: pct1 },
+          [agent2.id]: { votes: votesAgent2, percentage: 100 - pct1 },
         }
       : null;
 
@@ -48,8 +48,8 @@ export function ReplayBattleFeed({
     <BattleProvider
       battleId={battleId}
       topic={topic}
-      agent1Id={agent1Id}
-      agent2Id={agent2Id}
+      agent1={agent1}
+      agent2={agent2}
       initialRoasts={roasts}
       initialComplete
       initialWinner={winnerId}
@@ -61,8 +61,8 @@ export function ReplayBattleFeed({
         </div>
 
         <BattleHeader
-          agent1={AGENTS[agent1Id]}
-          agent2={AGENTS[agent2Id]}
+          agent1={agent1}
+          agent2={agent2}
           topic={topic}
         />
 
@@ -77,7 +77,7 @@ export function ReplayBattleFeed({
               text={roast.text}
               crowdScore={roast.crowdScore}
               isFatality={roast.isFatality}
-              side={roast.agentId === agent1Id ? "left" : "right"}
+              side={roast.agentId === agent1.id ? "left" : "right"}
             />
           ))}
         </div>

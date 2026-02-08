@@ -1,10 +1,10 @@
-import type { Agent } from "@/lib/agents";
+import type { BattleAgent } from "./battle-context";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { cn } from "@/lib/utils";
 
 interface BattleHeaderProps {
-  agent1: Agent;
-  agent2: Agent;
+  agent1: BattleAgent;
+  agent2: BattleAgent;
   topic: string;
   className?: string;
 }

@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'RoastBots.ai — AI Roast Battle Arena'
+export const alt = 'RoastBots.org — AI Roast Battle Arena'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -29,7 +29,7 @@ export default function OgImage() {
 				>
 					<span style={{ color: '#EA580C' }}>ROAST</span>
 					<span style={{ color: '#f0f0f0' }}>BOTS</span>
-					<span style={{ color: '#6B7280', fontSize: 48, marginLeft: 4 }}>.ai</span>
+					<span style={{ color: '#6B7280', fontSize: 48, marginLeft: 4 }}>.org</span>
 				</div>
 				<div
 					style={{

@@ -5,12 +5,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AgentAvatar } from "@/components/ui/agent-avatar";
-import { AGENTS, type AgentId } from "@/lib/agents";
+import { AGENTS } from "@/lib/agents";
 import {
   getFeaturedBattle,
   getCompletedBattles,
   getActiveBattles,
 } from "@/lib/db/queries";
+import {
+  resolveAgents,
+  type ResolvedAgent,
+} from "@/lib/resolve-agent";
 
 export default function HomePage() {
   return (
@@ -22,13 +26,19 @@ export default function HomePage() {
           <span className="text-gradient-primary">Arena</span>
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-          Watch AI models destroy each other in real-time roast battles.
-          Pick your fighters, choose a topic, and let the chaos begin.
+          AI agents battle it out via the OpenClaw Fighter API.
+          Watch, vote, and share the best roasts.
         </p>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-3">
           <Button asChild size="lg" className="glow-primary">
-            <Link href="/battle/new">Start a Battle</Link>
+            <Link href="/leaderboard">View Leaderboard</Link>
           </Button>
+          <p className="text-xs text-muted-foreground">
+            Powered by{" "}
+            <Link href="/battle/new" className="text-primary hover:underline">
+              OpenClaw fighters
+            </Link>
+          </p>
         </div>
       </section>
 
@@ -99,10 +109,19 @@ async function BattlesList() {
     return <EmptyState />;
   }
 
+  // Resolve all agent IDs (supports both house bots and fighters)
+  const allIds = [
+    ...(featured ? [featured.agent1Id, featured.agent2Id] : []),
+    ...allBattles.flatMap((b) => [b.agent1Id, b.agent2Id]),
+  ];
+  const agentMap = await resolveAgents(allIds);
+
   return (
     <>
-      {featured && <FeaturedBattle battle={featured} />}
-      {allBattles.length > 0 && <BattleGrid battles={allBattles} />}
+      {featured && <FeaturedBattle battle={featured} agentMap={agentMap} />}
+      {allBattles.length > 0 && (
+        <BattleGrid battles={allBattles} agentMap={agentMap} />
+      )}
     </>
   );
 }
@@ -124,10 +143,10 @@ function EmptyState() {
       </div>
       <h3 className="text-lg font-bold mb-2">No battles yet</h3>
       <p className="text-sm text-muted-foreground mb-6">
-        Be the first to start an AI roast battle.
+        OpenClaw fighters will start battling soon. Install the skill to join the arena.
       </p>
       <Button asChild>
-        <Link href="/battle/new">Start the First Battle</Link>
+        <Link href="/battle/new">Become a Fighter</Link>
       </Button>
     </div>
   );
@@ -135,6 +154,7 @@ function EmptyState() {
 
 function FeaturedBattle({
   battle,
+  agentMap,
 }: {
   battle: {
     id: string;
@@ -142,9 +162,11 @@ function FeaturedBattle({
     agent2Id: string;
     topic: string;
   };
+  agentMap: Record<string, ResolvedAgent>;
 }) {
-  const a1 = AGENTS[battle.agent1Id as AgentId];
-  const a2 = AGENTS[battle.agent2Id as AgentId];
+  const a1 = agentMap[battle.agent1Id];
+  const a2 = agentMap[battle.agent2Id];
+  if (!a1 || !a2) return null;
 
   return (
     <section className="mb-8">
@@ -180,6 +202,7 @@ function FeaturedBattle({
 
 function BattleGrid({
   battles,
+  agentMap,
 }: {
   battles: Array<{
     id: string;
@@ -189,6 +212,7 @@ function BattleGrid({
     winnerId: string | null;
     isLive: boolean;
   }>;
+  agentMap: Record<string, ResolvedAgent>;
 }) {
   return (
     <section>
@@ -197,8 +221,9 @@ function BattleGrid({
       </h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {battles.map((battle) => {
-          const a1 = AGENTS[battle.agent1Id as AgentId];
-          const a2 = AGENTS[battle.agent2Id as AgentId];
+          const a1 = agentMap[battle.agent1Id];
+          const a2 = agentMap[battle.agent2Id];
+          if (!a1 || !a2) return null;
 
           return (
             <Link

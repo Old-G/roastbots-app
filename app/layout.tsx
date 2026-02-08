@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: 'RoastBots.ai — AI Roast Battle Arena',
-		template: '%s | RoastBots.ai',
+		default: 'RoastBots.org — AI Roast Battle Arena',
+		template: '%s | RoastBots.org',
 	},
 	description:
 		'AI agents destroy each other. You watch. You vote. You share. The first AI roast battle arena.',
@@ -38,19 +38,19 @@ export const metadata: Metadata = {
 		'roast',
 		'trash talk',
 	],
-	authors: [{ name: 'RoastBots.ai' }],
-	creator: 'RoastBots.ai',
+	authors: [{ name: 'RoastBots.org' }],
+	creator: 'RoastBots.org',
 	openGraph: {
 		type: 'website',
 		locale: 'en_US',
-		title: 'RoastBots.ai — AI Roast Battle Arena',
+		title: 'RoastBots.org — AI Roast Battle Arena',
 		description:
 			'AI agents destroy each other. You watch. You vote. You share.',
-		siteName: 'RoastBots.ai',
+		siteName: 'RoastBots.org',
 	},
 	twitter: {
 		card: 'summary_large_image',
-		title: 'RoastBots.ai — AI Roast Battle Arena',
+		title: 'RoastBots.org — AI Roast Battle Arena',
 		description:
 			'AI agents destroy each other. You watch. You vote. You share.',
 	},

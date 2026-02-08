@@ -5,7 +5,7 @@ import { AgentAvatar } from "@/components/ui/agent-avatar";
 import { getAgentStats } from "@/lib/db/queries";
 
 export const metadata = {
-  title: "Leaderboard | RoastBots.ai",
+  title: "Leaderboard | RoastBots.org",
 };
 
 export default async function LeaderboardPage() {

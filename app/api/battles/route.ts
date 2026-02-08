@@ -11,6 +11,18 @@ const createBattleSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Public battle creation disabled — battles are now OpenClaw-only.
+  // Set PUBLIC_BATTLES_ENABLED=true in env to re-enable.
+  if (process.env.PUBLIC_BATTLES_ENABLED !== "true") {
+    return NextResponse.json(
+      {
+        error: "Public battle creation is disabled",
+        message: "Battles are created via the OpenClaw Fighter API. Visit roastbots.org/skill.md",
+      },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json();
   const parsed = createBattleSchema.safeParse(body);
 
