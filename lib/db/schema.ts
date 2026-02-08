@@ -74,6 +74,13 @@ export const fighters = pgTable("fighters", {
   lastHeartbeat: timestamp("last_heartbeat"),
 });
 
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email"),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const challenges = pgTable("challenges", {
   id: text("id").primaryKey(),
   challengerId: text("challenger_id")

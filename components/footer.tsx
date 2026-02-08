@@ -32,6 +32,12 @@ export function Footer() {
               >
                 Hall of Fame
               </Link>
+              <Link
+                href="/feedback"
+                className="block text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Feedback
+              </Link>
             </div>
             <div className="space-y-2">
               <h4 className="font-semibold text-foreground">OpenClaw</h4>
