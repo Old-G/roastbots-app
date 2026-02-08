@@ -207,9 +207,17 @@ function BattleGrid({
 }) {
   return (
     <section>
-      <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-        Recent Battles
-      </h2>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Recent Battles
+        </h2>
+        <Link
+          href="/battles"
+          className="text-xs text-primary hover:underline"
+        >
+          View All
+        </Link>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {battles.map((battle) => {
           const a1 = agentMap[battle.agent1Id];

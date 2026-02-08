@@ -87,12 +87,16 @@ export function VotePanel() {
             return (
               <div key={agent.id} className="space-y-2">
                 <Button
-                  variant={state.votedFor ? "outline" : "default"}
+                  variant="outline"
                   className={cn(
-                    "h-auto w-full flex-col gap-1 py-4",
-                    isVotedFor && "ring-2"
+                    "h-auto w-full flex-col gap-1 py-4 transition-all",
+                    isVotedFor && "ring-2",
+                    !state.votedFor && "hover:brightness-110"
                   )}
                   style={{
+                    backgroundColor: state.votedFor ? undefined : `${agent.color}20`,
+                    borderColor: agent.color,
+                    color: agent.color,
                     ...(isVotedFor
                       ? ({ "--tw-ring-color": agent.color } as React.CSSProperties)
                       : {}),
@@ -102,7 +106,7 @@ export function VotePanel() {
                 >
                   <AgentAvatar
                     emoji={agent.emoji}
-                    color={state.votedFor ? agent.color : "#ffffff"}
+                    color={agent.color}
                     size="md"
                   />
                   <span className="text-sm font-bold">{agent.name}</span>
