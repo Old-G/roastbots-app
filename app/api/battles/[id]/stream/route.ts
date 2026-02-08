@@ -73,7 +73,7 @@ export async function GET(
               model: AGENT_MODEL,
               system: systemPrompt,
               messages,
-              maxOutputTokens: 1500,
+              maxOutputTokens: 800,
               providerOptions: {
                 openai: { reasoningEffort: "low" },
               },
