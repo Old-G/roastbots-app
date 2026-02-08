@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, useCallback, useState } from "react";
+import { createContext, use, useCallback, useMemo, useState } from "react";
 import type { AgentId, Agent } from "@/lib/agents";
 import { AGENTS } from "@/lib/agents";
 
@@ -96,44 +96,59 @@ export function BattleProvider({
   );
   const [winner, setWinner] = useState<string | null>(initialWinner);
 
-  const actions: BattleActions = {
-    addRoast: useCallback((roast: Roast) => {
-      setRoasts((prev) => [...prev, roast]);
-      setCurrentStreamingText("");
-    }, []),
-    setStreamingText: useCallback((text: string) => {
-      setCurrentStreamingText(text);
-    }, []),
-    setCurrentAgent: useCallback((agentId: AgentId | null) => {
-      setCurrentAgentId(agentId);
-    }, []),
-    setStreaming: useCallback((streaming: boolean) => {
-      setIsStreaming(streaming);
-    }, []),
-    setComplete: useCallback((winId: string | null) => {
-      setIsComplete(true);
-      setIsStreaming(false);
+  const addRoast = useCallback((roast: Roast) => {
+    setRoasts((prev) => [...prev, roast]);
+    setCurrentStreamingText("");
+  }, []);
+  const setStreamingTextFn = useCallback((text: string) => {
+    setCurrentStreamingText(text);
+  }, []);
+  const setCurrentAgentFn = useCallback((agentId: AgentId | null) => {
+    setCurrentAgentId(agentId);
+  }, []);
+  const setStreamingFn = useCallback((streaming: boolean) => {
+    setIsStreaming(streaming);
+  }, []);
+  const setCompleteFn = useCallback((winId: string | null) => {
+    setIsComplete(true);
+    setIsStreaming(false);
+    setThinkingAgent(null);
+    setWinner(winId);
+  }, []);
+  const setThinkingAgentFn = useCallback((agentId: AgentId | null) => {
+    setThinkingAgent(agentId);
+  }, []);
+  const setVoteFn = useCallback(
+    (agentId: AgentId, results: VoteResults, winId: string | null) => {
+      setVotedFor(agentId);
+      setVoteResults(results);
       setWinner(winId);
-    }, []),
-    setThinkingAgent: useCallback((agentId: AgentId | null) => {
-      setThinkingAgent(agentId);
-    }, []),
-    setVote: useCallback(
-      (agentId: AgentId, results: VoteResults, winId: string | null) => {
-        setVotedFor(agentId);
-        setVoteResults(results);
-        setWinner(winId);
-      },
-      []
-    ),
-  };
+    },
+    []
+  );
 
-  const meta: BattleMeta = {
-    battleId,
-    topic,
-    agent1: AGENTS[agent1Id],
-    agent2: AGENTS[agent2Id],
-  };
+  const actions = useMemo<BattleActions>(
+    () => ({
+      addRoast,
+      setStreamingText: setStreamingTextFn,
+      setCurrentAgent: setCurrentAgentFn,
+      setStreaming: setStreamingFn,
+      setComplete: setCompleteFn,
+      setThinkingAgent: setThinkingAgentFn,
+      setVote: setVoteFn,
+    }),
+    [addRoast, setStreamingTextFn, setCurrentAgentFn, setStreamingFn, setCompleteFn, setThinkingAgentFn, setVoteFn]
+  );
+
+  const meta = useMemo<BattleMeta>(
+    () => ({
+      battleId,
+      topic,
+      agent1: AGENTS[agent1Id],
+      agent2: AGENTS[agent2Id],
+    }),
+    [battleId, topic, agent1Id, agent2Id]
+  );
 
   return (
     <BattleContext

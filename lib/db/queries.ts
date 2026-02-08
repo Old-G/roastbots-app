@@ -51,6 +51,13 @@ export async function saveRoast(data: {
   return roast;
 }
 
+export async function markBattleStreaming(id: string) {
+  await db
+    .update(battles)
+    .set({ status: "streaming" })
+    .where(eq(battles.id, id));
+}
+
 export async function markBattleComplete(id: string) {
   const battleRoasts = await db.query.roasts.findMany({
     where: eq(roasts.battleId, id),

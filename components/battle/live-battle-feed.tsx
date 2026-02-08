@@ -73,8 +73,9 @@ function LiveBattleFeedInner() {
       actions.setThinkingAgent(data.agent_id as AgentId);
     });
 
-    eventSource.addEventListener("battle_complete", () => {
-      actions.setComplete(null);
+    eventSource.addEventListener("battle_complete", (e) => {
+      const data = JSON.parse(e.data);
+      actions.setComplete(data.winner_id ?? null);
       eventSource.close();
     });
 

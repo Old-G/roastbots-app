@@ -6,7 +6,7 @@ import {
   type RoastMessage,
 } from "@/lib/ai/prompts";
 import { judgeRoast } from "@/lib/ai/judge";
-import { getBattle, saveRoast, markBattleComplete } from "@/lib/db/queries";
+import { getBattle, saveRoast, markBattleComplete, markBattleStreaming } from "@/lib/db/queries";
 import { AGENTS, type AgentId } from "@/lib/agents";
 import { generateRoastId } from "@/lib/utils";
 
@@ -23,9 +23,16 @@ export async function GET(
     return new Response("Battle not found", { status: 404 });
   }
 
-  if (battle.status === "completed") {
-    return new Response("Battle already completed", { status: 400 });
+  if (battle.status === "completed" || battle.status === "streaming") {
+    return new Response(
+      battle.status === "completed"
+        ? "Battle already completed"
+        : "Battle already streaming",
+      { status: 400 }
+    );
   }
+
+  await markBattleStreaming(id);
 
   const encoder = new TextEncoder();
 
@@ -66,8 +73,10 @@ export async function GET(
               model: AGENT_MODEL,
               system: systemPrompt,
               messages,
-              maxOutputTokens: 250,
-              temperature: 0.9,
+              maxOutputTokens: 1500,
+              providerOptions: {
+                openai: { reasoningEffort: "low" },
+              },
             });
 
             let fullText = "";
@@ -115,18 +124,28 @@ export async function GET(
               is_fatality: isFatality,
             });
 
-            // Dramatic pause before next agent
-            const nextAgentId = agentId === agent1Id ? agent2Id : agent1Id;
-            send("thinking", {
-              agent_id: nextAgentId,
-              message: `${AGENTS[nextAgentId].name} is preparing a response...`,
-            });
-            await new Promise((r) => setTimeout(r, 1500));
+            // Dramatic pause before next agent (skip after last roast)
+            const isLastRoast = round === totalRounds && agentId === agent2Id;
+            if (!isLastRoast) {
+              const nextAgentId = agentId === agent1Id ? agent2Id : agent1Id;
+              send("thinking", {
+                agent_id: nextAgentId,
+                message: `${AGENTS[nextAgentId].name} is preparing a response...`,
+              });
+              await new Promise((r) => setTimeout(r, 1500));
+            }
           }
         }
 
         await markBattleComplete(id);
-        send("battle_complete", { battle_id: id, total_roasts: totalRounds * 2 });
+        const completedBattle = await getBattle(id);
+        send("battle_complete", {
+          battle_id: id,
+          total_roasts: totalRounds * 2,
+          winner_id: completedBattle?.winnerId ?? null,
+          agent1_id: agent1Id,
+          agent2_id: agent2Id,
+        });
       } catch (error) {
         send("error", {
           message: "Battle encountered an error",

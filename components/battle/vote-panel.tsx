@@ -12,6 +12,11 @@ export function VotePanel() {
 
   if (!state.isComplete) return null;
 
+  const agents = [meta.agent1, meta.agent2] as const;
+  const judgeWinner = state.winner
+    ? agents.find((a) => a.id === state.winner)
+    : null;
+
   const handleVote = async (agentId: AgentId) => {
     if (state.votedFor || isVoting) return;
     setIsVoting(true);
@@ -47,61 +52,82 @@ export function VotePanel() {
     }
   };
 
-  const agents = [meta.agent1, meta.agent2] as const;
-
   return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-6 text-center">
-      <h3 className="text-lg font-bold">
-        {state.votedFor ? "\u{1F451} Results" : "\u26A1 WHO WON? \u26A1"}
-      </h3>
+    <div className="space-y-4">
+      {/* Judge verdict */}
+      <div className="rounded-xl border border-border bg-card p-6 text-center">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          AI Judge Verdict
+        </p>
+        <h3 className="text-lg font-bold">
+          {judgeWinner ? (
+            <>
+              {"\u{1F451}"}{" "}
+              <span style={{ color: judgeWinner.color }}>
+                {judgeWinner.name}
+              </span>{" "}
+              wins!
+            </>
+          ) : (
+            "Draw!"
+          )}
+        </h3>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {agents.map((agent) => {
-          const result = state.voteResults?.[agent.id];
-          const isWinner = state.winner === agent.id;
-          const isVotedFor = state.votedFor === agent.id;
+      {/* Community vote */}
+      <div className="rounded-xl border border-border bg-card p-6 text-center space-y-4">
+        <h3 className="text-sm font-bold">
+          {state.votedFor ? "Community Vote" : "Who do you think won?"}
+        </h3>
 
-          return (
-            <div key={agent.id} className="space-y-2">
-              <Button
-                variant={state.votedFor ? "outline" : "default"}
-                className={cn(
-                  "h-auto w-full flex-col gap-1 py-4",
-                  isVotedFor && "ring-2",
-                  isWinner && state.votedFor && "border-primary"
-                )}
-                style={{
-                  borderColor: isWinner && state.votedFor ? agent.color : undefined,
-                  ...(isVotedFor ? { "--tw-ring-color": agent.color } as React.CSSProperties : {}),
-                }}
-                onClick={() => handleVote(agent.id as AgentId)}
-                disabled={!!state.votedFor || isVoting}
-              >
-                <span className="text-3xl">
-                  {isWinner && state.votedFor ? "\u{1F451}" : agent.avatar}
-                </span>
-                <span className="text-sm font-bold">{agent.name}</span>
-              </Button>
+        <div className="grid grid-cols-2 gap-4">
+          {agents.map((agent) => {
+            const result = state.voteResults?.[agent.id];
+            const isVotedFor = state.votedFor === agent.id;
 
-              {state.votedFor && result && (
-                <div className="space-y-1">
-                  <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{
-                        width: `${result.percentage}%`,
-                        backgroundColor: agent.color,
-                      }}
-                    />
+            return (
+              <div key={agent.id} className="space-y-2">
+                <Button
+                  variant={state.votedFor ? "outline" : "default"}
+                  className={cn(
+                    "h-auto w-full flex-col gap-1 py-4",
+                    isVotedFor && "ring-2"
+                  )}
+                  style={{
+                    ...(isVotedFor
+                      ? ({ "--tw-ring-color": agent.color } as React.CSSProperties)
+                      : {}),
+                  }}
+                  onClick={() => handleVote(agent.id as AgentId)}
+                  disabled={!!state.votedFor || isVoting}
+                >
+                  <span className="text-3xl">{agent.avatar}</span>
+                  <span className="text-sm font-bold">{agent.name}</span>
+                </Button>
+
+                {state.votedFor && result && (
+                  <div className="space-y-1">
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{
+                          width: `${result.percentage}%`,
+                          backgroundColor: agent.color,
+                        }}
+                      />
+                    </div>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: agent.color }}
+                    >
+                      {result.percentage}% ({result.votes} votes)
+                    </p>
                   </div>
-                  <p className="text-sm font-medium" style={{ color: agent.color }}>
-                    {result.percentage}% ({result.votes} votes)
-                  </p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

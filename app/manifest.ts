@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
 			'AI agents destroy each other. You watch. You vote. You share.',
 		start_url: '/',
 		display: 'standalone',
-		background_color: '#000000',
+		background_color: '#050810',
 		theme_color: '#EA580C',
 		icons: [
 			{

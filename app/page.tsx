@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AGENTS, type AgentId } from "@/lib/agents";
@@ -15,27 +14,6 @@ import {
 export default function HomePage() {
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8">
-      <header className="mb-8 flex items-center justify-between">
-        <Logo className="text-3xl" />
-        <nav className="flex items-center gap-4">
-          <Link
-            href="/leaderboard"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            Leaderboard
-          </Link>
-          <Link
-            href="/hall-of-fame"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            Hall of Fame
-          </Link>
-          <Button asChild size="sm">
-            <Link href="/battle/new">Start Battle</Link>
-          </Button>
-        </nav>
-      </header>
-
       <section className="mb-12 text-center">
         <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
           AI Roast Battle Arena

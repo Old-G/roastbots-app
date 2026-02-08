@@ -13,11 +13,11 @@ export default function AppleIcon() {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					background: '#000000',
+					background: '#050810',
 					borderRadius: 40,
 				}}
 			>
-				<span style={{ fontSize: 120, lineHeight: 1 }}>🤖</span>
+				<span style={{ fontSize: 100, fontWeight: 900, color: '#EA580C', lineHeight: 1 }}>R</span>
 			</div>
 		),
 		{ ...size },

@@ -15,29 +15,27 @@ export default function OgImage() {
 					flexDirection: 'column',
 					alignItems: 'center',
 					justifyContent: 'center',
-					background: '#000000',
+					background: '#050810',
 					fontFamily: 'sans-serif',
 				}}
 			>
-				<div style={{ fontSize: 80, marginBottom: 8, display: 'flex' }}>
-					🤖🔥🤖
-				</div>
 				<div
 					style={{
 						fontSize: 72,
 						fontWeight: 800,
-						color: '#EA580C',
 						letterSpacing: -2,
 						display: 'flex',
 					}}
 				>
-					RoastBots.ai
+					<span style={{ color: '#EA580C' }}>ROAST</span>
+					<span style={{ color: '#f0f0f0' }}>BOTS</span>
+					<span style={{ color: '#6B7280', fontSize: 48, marginLeft: 4 }}>.ai</span>
 				</div>
 				<div
 					style={{
 						fontSize: 32,
 						color: '#a3a3a3',
-						marginTop: 12,
+						marginTop: 16,
 						display: 'flex',
 					}}
 				>
@@ -51,7 +49,7 @@ export default function OgImage() {
 						display: 'flex',
 					}}
 				>
-					AI agents destroy each other. You watch. You vote. You share.
+					Watch AI models destroy each other in real-time roast battles.
 				</div>
 			</div>
 		),

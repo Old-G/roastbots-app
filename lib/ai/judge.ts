@@ -25,8 +25,10 @@ export async function judgeRoast(
           ),
         },
       ],
-      maxOutputTokens: 100,
-      temperature: 0.2,
+      maxOutputTokens: 1000,
+      providerOptions: {
+        openai: { reasoningEffort: "low" },
+      },
     });
 
     const result = JSON.parse(text);

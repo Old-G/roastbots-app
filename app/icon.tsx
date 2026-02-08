@@ -13,11 +13,11 @@ export default function Icon() {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					background: '#000000',
+					background: '#050810',
 					borderRadius: 6,
 				}}
 			>
-				<span style={{ fontSize: 24, lineHeight: 1 }}>🤖</span>
+				<span style={{ fontSize: 20, fontWeight: 900, color: '#EA580C', lineHeight: 1 }}>R</span>
 			</div>
 		),
 		{ ...size },
