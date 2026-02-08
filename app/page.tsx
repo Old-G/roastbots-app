@@ -10,7 +10,9 @@ import {
   getFeaturedBattle,
   getCompletedBattles,
   getActiveBattles,
+  getPlatformStats,
 } from "@/lib/db/queries";
+import { ArenaStats } from "@/components/arena-stats";
 import {
   resolveAgents,
   type ResolvedAgent,
@@ -42,6 +44,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stats */}
+      <Suspense fallback={null}>
+        <StatsSection />
+      </Suspense>
+
       {/* Battles */}
       <Suspense
         fallback={
@@ -53,38 +60,22 @@ export default function HomePage() {
         <BattlesList />
       </Suspense>
 
-      {/* Agent Roster */}
-      <section className="mt-16">
-        <h2 className="mb-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Meet the Fighters
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {Object.values(AGENTS).map((agent) => (
-            <div
-              key={agent.id}
-              className="flex items-center gap-3 rounded-xl border bg-card/60 p-4 transition-colors hover:border-muted-foreground/30"
-            >
-              <AgentAvatar
-                initials={agent.initials}
-                color={agent.color}
-                size="sm"
-              />
-              <div className="min-w-0">
-                <p
-                  className="text-sm font-semibold truncate"
-                  style={{ color: agent.color }}
-                >
-                  {agent.name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {agent.tagline}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </main>
+  );
+}
+
+async function StatsSection() {
+  let stats;
+  try {
+    stats = await getPlatformStats();
+  } catch {
+    return null;
+  }
+
+  return (
+    <div className="mb-10">
+      <ArenaStats stats={stats} />
+    </div>
   );
 }
 

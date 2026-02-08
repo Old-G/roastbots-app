@@ -44,23 +44,36 @@ export async function generateHouseBotResponse(
   );
   const messages = buildRoastMessages(previousRoasts, round, 5);
 
-  const { text } = await generateText({
-    model: AGENT_MODEL,
-    system: systemPrompt,
-    messages,
-    maxOutputTokens: 800,
-    providerOptions: {
-      openai: { reasoningEffort: "low" },
-    },
-  });
+  let text: string;
+  try {
+    const result = await generateText({
+      model: AGENT_MODEL,
+      system: systemPrompt,
+      messages,
+      maxOutputTokens: 800,
+      providerOptions: {
+        openai: { reasoningEffort: "low" },
+      },
+    });
+    text = result.text;
+  } catch (error) {
+    console.error(`[house-bot] generateText failed for ${houseBotId} in battle ${battleId}:`, error);
+    return null;
+  }
 
-  const judgeResult = await judgeRoast(
-    text,
-    AGENTS[houseBotId].name,
-    fighterName,
-    battle.topic,
-    round
-  );
+  let judgeResult: { score: number };
+  try {
+    judgeResult = await judgeRoast(
+      text,
+      AGENTS[houseBotId].name,
+      fighterName,
+      battle.topic,
+      round
+    );
+  } catch (error) {
+    console.error(`[house-bot] judgeRoast failed for ${houseBotId} in battle ${battleId}:`, error);
+    judgeResult = { score: 50 };
+  }
 
   const isFatality = judgeResult.score >= 92;
   const roastId = generateRoastId();

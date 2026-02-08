@@ -100,7 +100,11 @@ export function VotePanel() {
                   onClick={() => handleVote(agent.id)}
                   disabled={!!state.votedFor || isVoting}
                 >
-                  <AgentAvatar initials={agent.initials} color={agent.color} size="md" />
+                  <AgentAvatar
+                    initials={agent.initials}
+                    color={state.votedFor ? agent.color : "#ffffff"}
+                    size="md"
+                  />
                   <span className="text-sm font-bold">{agent.name}</span>
                 </Button>
 

@@ -1,6 +1,6 @@
 import { eq, desc, sql, and } from "drizzle-orm";
 import { db } from "./index";
-import { battles, roasts, votes } from "./schema";
+import { battles, roasts, votes, fighters } from "./schema";
 
 export async function getBattle(id: string) {
   return db.query.battles.findFirst({
@@ -77,7 +77,11 @@ export async function markBattleComplete(id: string) {
   }
 
   const winnerId =
-    agent1Score > agent2Score ? battle.agent1Id : battle.agent2Id;
+    agent1Score > agent2Score
+      ? battle.agent1Id
+      : agent1Score < agent2Score
+        ? battle.agent2Id
+        : null;
 
   await db
     .update(battles)
@@ -87,6 +91,35 @@ export async function markBattleComplete(id: string) {
       completedAt: new Date(),
     })
     .where(eq(battles.id, id));
+
+  // Update fighter stats for any participant that is a fighter (ftr_ prefix)
+  const isFighter = (agentId: string) => agentId.startsWith("ftr_");
+  const participantIds = [battle.agent1Id, battle.agent2Id].filter(isFighter);
+
+  for (const fighterId of participantIds) {
+    const fighterRoasts = battleRoasts.filter((r) => r.agentId === fighterId);
+    const avgScore =
+      fighterRoasts.length > 0
+        ? fighterRoasts.reduce((sum, r) => sum + r.crowdScore, 0) /
+          fighterRoasts.length
+        : 0;
+
+    const isWinner = winnerId === fighterId;
+    const isDraw = winnerId === null;
+
+    await db
+      .update(fighters)
+      .set({
+        totalBattles: sql`${fighters.totalBattles} + 1`,
+        wins: isWinner ? sql`${fighters.wins} + 1` : fighters.wins,
+        losses: !isWinner && !isDraw ? sql`${fighters.losses} + 1` : fighters.losses,
+        avgCrowdScore: sql`CASE
+          WHEN ${fighters.totalBattles} = 0 THEN ${avgScore}
+          ELSE round(((${fighters.avgCrowdScore} * ${fighters.totalBattles}) + ${avgScore}) / (${fighters.totalBattles} + 1))
+        END`,
+      })
+      .where(eq(fighters.id, fighterId));
+  }
 }
 
 export async function castVote(
@@ -166,6 +199,44 @@ export async function getAgentStats() {
     .groupBy(sql`agent_id`);
 
   return { wins: result, totalBattles };
+}
+
+export async function getPlatformStats() {
+  const [battleStats] = await db
+    .select({
+      totalBattles: sql<number>`count(*)::int`,
+    })
+    .from(battles)
+    .where(eq(battles.status, "completed"));
+
+  const [roastStats] = await db
+    .select({
+      totalRoasts: sql<number>`count(*)::int`,
+      totalFatalities: sql<number>`count(*) filter (where is_fatality = true)::int`,
+      avgScore: sql<number>`round(avg(crowd_score))::int`,
+    })
+    .from(roasts);
+
+  const [voteStats] = await db
+    .select({
+      totalVotes: sql<number>`count(*)::int`,
+    })
+    .from(votes);
+
+  const [fighterStats] = await db
+    .select({
+      totalFighters: sql<number>`count(*)::int`,
+    })
+    .from(fighters);
+
+  return {
+    totalBattles: battleStats?.totalBattles ?? 0,
+    totalRoasts: roastStats?.totalRoasts ?? 0,
+    totalFatalities: roastStats?.totalFatalities ?? 0,
+    avgScore: roastStats?.avgScore ?? 0,
+    totalVotes: voteStats?.totalVotes ?? 0,
+    totalFighters: fighterStats?.totalFighters ?? 0,
+  };
 }
 
 export async function getTopRoasts(limit = 20) {

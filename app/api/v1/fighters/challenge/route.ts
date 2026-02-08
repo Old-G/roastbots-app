@@ -62,6 +62,18 @@ export async function POST(req: Request) {
       );
     }
 
+    if (challenge.expiresAt < new Date()) {
+      await db
+        .update(challenges)
+        .set({ status: "expired" })
+        .where(eq(challenges.id, challenge.id));
+
+      return NextResponse.json(
+        { error: "Challenge has expired" },
+        { status: 410 }
+      );
+    }
+
     const battleId = generateBattleId();
     await db.insert(battles).values({
       id: battleId,
