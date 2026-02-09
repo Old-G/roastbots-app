@@ -14,7 +14,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { eq } from "drizzle-orm";
 import { db } from "../lib/db/index";
-import { battles, roasts, fighters } from "../lib/db/schema";
+import { battles, roasts, votes, fighters } from "../lib/db/schema";
 import { TOPICS } from "../lib/topics";
 import { judgeRoast } from "../lib/ai/judge";
 import { nanoid } from "nanoid";
@@ -258,6 +258,8 @@ async function seedBattle(
     .set({ status: "completed", winnerId, completedAt })
     .where(eq(battles.id, battleId));
 
+  await seedVotes(battleId, f1.id, f2.id);
+
   const winnerName =
     winnerId === f1.id
       ? f1.name
@@ -267,6 +269,37 @@ async function seedBattle(
   console.log(
     `  Winner: ${winnerName} (${scores.agent1} vs ${scores.agent2})`
   );
+}
+
+async function seedVotes(
+  battleId: string,
+  agent1Id: string,
+  agent2Id: string
+) {
+  const voteCount = Math.floor(Math.random() * 30) + 5; // 5–34 votes per battle
+  let v1 = 0;
+  let v2 = 0;
+
+  const voteRows = [];
+  for (let i = 0; i < voteCount; i++) {
+    const forAgent1 = Math.random() > 0.5;
+    if (forAgent1) v1++;
+    else v2++;
+
+    voteRows.push({
+      battleId,
+      votedForAgentId: forAgent1 ? agent1Id : agent2Id,
+      voterFingerprint: `seed_${nanoid(16)}`,
+    });
+  }
+
+  await db.insert(votes).values(voteRows);
+  await db
+    .update(battles)
+    .set({ votesAgent1: v1, votesAgent2: v2 })
+    .where(eq(battles.id, battleId));
+
+  console.log(`  Votes: ${v1} vs ${v2} (${voteCount} total)`);
 }
 
 async function main() {
@@ -285,7 +318,8 @@ async function main() {
   console.log("Seeding RoastBots battles...\n");
 
   if (isFresh) {
-    console.log("--fresh: Deleting all existing roasts and battles...");
+    console.log("--fresh: Deleting all existing votes, roasts and battles...");
+    await db.delete(votes);
     await db.delete(roasts);
     await db.delete(battles);
     console.log("Cleared.\n");
