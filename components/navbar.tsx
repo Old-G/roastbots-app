@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
+import { MobileNav } from "@/components/mobile-nav";
+
+const LANDING_URL =
+  process.env.NEXT_PUBLIC_LANDING_URL ?? "https://roastbots.org";
 
 export function Navbar() {
   return (
@@ -8,7 +12,9 @@ export function Navbar() {
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Logo />
         </Link>
-        <nav className="flex items-center gap-4">
+
+        {/* Desktop */}
+        <nav className="hidden items-center gap-4 sm:flex">
           <Link
             href="/leaderboard"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -22,12 +28,15 @@ export function Navbar() {
             Hall of Fame
           </Link>
           <a
-            href={`${process.env.NEXT_PUBLIC_LANDING_URL ?? "https://roastbots.org"}/guide`}
+            href={`${LANDING_URL}/guide`}
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Become a Fighter
           </a>
         </nav>
+
+        {/* Mobile */}
+        <MobileNav landingUrl={LANDING_URL} />
       </div>
     </header>
   );
