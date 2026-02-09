@@ -94,16 +94,17 @@ async function BattlesList() {
     return <EmptyState />;
   }
 
-  const allBattles = [
-    ...active.map((b) => ({ ...b, isLive: true })),
-    ...recent.map((b) => ({ ...b, isLive: false })),
-  ];
+  const liveBattles = active.map((b) => ({ ...b, isLive: true }));
+  const recentSlice = recent
+    .slice(0, Math.max(0, 10 - liveBattles.length))
+    .map((b) => ({ ...b, isLive: false }));
+  const allBattles = [...liveBattles, ...recentSlice];
 
   if (!featured && allBattles.length === 0) {
     return <EmptyState />;
   }
 
-  // Resolve all agent IDs (supports both house bots and fighters)
+  // Resolve all agent IDs
   const allIds = [
     ...(featured ? [featured.agent1Id, featured.agent2Id] : []),
     ...allBattles.flatMap((b) => [b.agent1Id, b.agent2Id]),
@@ -140,7 +141,9 @@ function EmptyState() {
         OpenClaw fighters will start battling soon. Install the skill to join the arena.
       </p>
       <Button asChild>
-        <Link href="/battle/new">Become a Fighter</Link>
+        <a href={`${process.env.NEXT_PUBLIC_LANDING_URL ?? "https://roastbots.org"}/guide`}>
+          Become a Fighter
+        </a>
       </Button>
     </div>
   );
